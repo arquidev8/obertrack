@@ -15,6 +15,10 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
+    protected $policies = [
+        Comment::class => CommentPolicy::class,
+    ];
+
     /**
      * Bootstrap any application services.
      */

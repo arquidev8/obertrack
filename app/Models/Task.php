@@ -9,24 +9,68 @@ class Task extends Model
 {
     use HasFactory;
 
+    // protected $fillable = [
+    //     'title',
+    //     'description',
+    //     'completed',
+    //     'created_by',
+    //     'visible_para',
+    //     'duration' // Agrega este campo para indicar el ID del empleador
+    // ];
+
+
+    // protected $casts = [
+    //     'completed' => 'boolean',
+    //     'duration' => 'float',
+    // ];
+
+    // protected $fillable = [
+    //     'title',
+    //     'description',
+    //     'created_by',
+    //     'visible_para',
+    //     'start_date',
+    //     'end_date',
+    //     'priority',
+    //     'completed',
+    //     // 'duration',
+    // ];
+
+    // protected $casts = [
+    //     'completed' => 'boolean',
+    //     // 'duration' => 'float',
+    //     'start_date' => 'date',
+    //     'end_date' => 'date',
+    // ];
+
     protected $fillable = [
         'title',
         'description',
-        'completed',
         'created_by',
         'visible_para',
-        'duration' // Agrega este campo para indicar el ID del empleador
+        'start_date',
+        'end_date',
+        'priority',
+        'completed',
     ];
-
 
     protected $casts = [
         'completed' => 'boolean',
-        'duration' => 'float',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
-    public function setDurationAttribute($value)
+   
+
+
+    // public function setDurationAttribute($value)
+    // {
+    //     $this->attributes['duration'] = is_numeric($value) ? $value : null;
+    // }
+
+    public function comments()
     {
-        $this->attributes['duration'] = is_numeric($value) ? $value : null;
+        return $this->hasMany(Comment::class);
     }
 
 
@@ -40,10 +84,6 @@ class Task extends Model
        return $this->belongsTo(User::class, 'visible_para');
    }
    
-   public function comments()
-   {
-       return $this->hasMany(Comment::class);
-   }
-
+  
 
 }

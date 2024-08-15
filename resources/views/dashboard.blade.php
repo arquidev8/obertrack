@@ -37,18 +37,18 @@
                                 @if (auth()->user()->tipo_usuario == 'empleado')
                                     <a href="{{ route('empleados.crear-tarea') }}" 
                                        class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
-                                        <span class="material-icons-outlined mr-3 text-pink-400">assignment</span>
+                                        <span class="material-icons-outlined mr-3 text-blue-400">assignment</span>
                                         {{ __('Crear Tarea') }}
                                     </a>
                                 @elseif (auth()->user()->tipo_usuario == 'empleador')
                                     <a href="{{ route('empleadores.tareas-asignadas') }}" 
                                        class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
-                                        <span class="material-icons-outlined mr-3 text-pink-400">assignment_turned_in</span>
-                                        {{ __('Ver Tareas') }}
+                                        <span class="material-icons-outlined mr-3 text-blue-400">assignment_turned_in</span>
+                                        {{ __('Registro de Horas') }}
                                     </a>
                                 @endif
                                 <a href="/profile" class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
-                                    <span class="material-icons-outlined mr-3 text-pink-400">person</span>
+                                    <span class="material-icons-outlined mr-3 text-blue-400">person</span>
                                     Perfil
                                 </a>
                                 <form method="POST" action="{{ route('logout') }}">
@@ -56,7 +56,7 @@
                                     <a href="{{ route('logout') }}" 
                                        onclick="event.preventDefault(); this.closest('form').submit();"  
                                        class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
-                                        <span class="material-icons-outlined mr-3 text-pink-400">logout</span>
+                                        <span class="material-icons-outlined mr-3 text-blue-400">logout</span>
                                         {{ __('Cerrar Sesión') }}
                                     </a>
                                 </form>
@@ -70,7 +70,7 @@
                     <!-- Welcome Card -->
                     <div class="bg-black rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up">
                         <div class="p-8 gradient-bg">
-                            <h2 class="text-3xl font-bold text-white mb-4">Bienvenido, <span class="text-pink-400">{{ $nombreUsuario }}</span></h2>
+                            <h2 class="text-3xl font-bold text-white mb-4">Bienvenido, <span class="text-blue-400">{{ $nombreUsuario }}</span></h2>
                             <p class="text-gray-100 text-lg mb-6">¿Qué te gustaría hacer hoy?</p>
                             <a href="/empleados/crear-tarea" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver tareas</a>
                         </div>
@@ -78,12 +78,29 @@
 
                     <!-- Messages Card -->
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="100">
-                        <div class="p-8 bg-pink-400">
+                        <div class="p-8 bg-blue-400">
                             <h2 class="text-3xl font-bold text-white mb-4">Mensajes</h2>
                             <p class="text-gray-100 text-lg mb-6">Mantente conectado con tu equipo</p>
                             <a href="/chat" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver mensajes</a>
                         </div>
                     </div>
+                    @if (auth()->user()->tipo_usuario == 'empleado')
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="100">
+                        <div class="p-8 bg-green-600">
+                            <h2 class="text-3xl font-bold text-white mb-4">Registrar Horas</h2>
+                            <p class="text-gray-100 text-lg mb-6">Registra las horas diariamente.</p>
+                            <a href="{{ route('empleados.crear-tarea') }}" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Registrar Horas</a>
+                        </div>
+                    </div>
+                    @elseif (auth()->user()->tipo_usuario == 'empleador')
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="100">
+                        <div class="p-8 bg-green-600">
+                            <h2 class="text-3xl font-bold text-white mb-4">Registro de Horas</h2>
+                            <p class="text-gray-100 text-lg mb-6">Mantente informado del registro de horas de los profesionales.</p>
+                            <a href="{{ route('empleadores.tareas-asignadas') }}" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver Resumen</a>
+                        </div>
+                    </div>
+                    @endif
 
                     <!-- Resources Section -->
                     <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 card-hover" data-aos="fade-up" data-aos-delay="200">

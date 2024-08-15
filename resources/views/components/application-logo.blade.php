@@ -1,1 +1,1 @@
-<img src="https://i.postimg.cc/hvq6gWSJ/logo-oberstaff-8.png" alt="Logo de Mi Sitio Web" width="150" height="150">
+<img src="https://i.postimg.cc/L8p1BH9D/Obertrack.jpg" class="mt-5" alt="Logo de Mi Sitio Web" width="100" height="100">

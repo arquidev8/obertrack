@@ -102,52 +102,107 @@ class TaskController extends Controller
 // }
 
 
-public function store(Request $request)
+// public function store(Request $request)
+// {
+//     $validatedData = $request->validate([
+//         'title' => 'required|string|max:255',
+//         'description' => 'nullable|string',
+//         'duration' => 'nullable|numeric|min:0',
+//         'completed' => 'boolean',
+//         // ... otras validaciones ...
+//     ]);
+
+//     $task = Task::create([
+//         'created_by' => Auth::id(),
+//         'title' => $validatedData['title'],
+//         'description' => $validatedData['description'],
+//         'duration' => $validatedData['duration'],
+//         'completed' => $validatedData['completed'] ?? false,
+//         // ... otros campos ...
+//     ]);
+
+//     if ($validatedData['duration']) {
+//         WorkHours::create([
+//             'user_id' => Auth::id(),
+//             'work_date' => now()->toDateString(),
+//             'hours_worked' => $validatedData['duration'],
+//             'approved' => false,
+//         ]);
+//     }
+
+//     return back()->with('success', 'Tarea creada exitosamente.');
+// }
+
+
+
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'priority' => 'required|in:low,medium,high,urgent',
+            // 'duration' => 'nullable|numeric|min:0',
+            'completed' => 'boolean',
+        ]);
+
+        $task = Task::create([
+            'created_by' => Auth::id(),
+            'visible_para' => Auth::user()->empleador_id,
+            'title' => $validatedData['title'],
+            'description' => $validatedData['description'],
+            'start_date' => $validatedData['start_date'],
+            'end_date' => $validatedData['end_date'],
+            'priority' => $validatedData['priority'],
+            // 'duration' => $validatedData['duration'],
+            'completed' => $validatedData['completed'] ?? false,
+        ]);
+
+        // if ($validatedData['duration']) {
+        //     WorkHours::create([
+        //         'user_id' => Auth::id(),
+        //         'work_date' => now()->toDateString(),
+        //         'hours_worked' => $validatedData['duration'],
+        //         'approved' => false,
+        //     ]);
+        // }
+
+        return back()->with('success', 'Tarea creada exitosamente.');
+    }
+
+
+    // public function update(Request $request, $taskId)
+    // {
+    //     $validatedData = $request->validate([
+    //         'title' => 'required|string|max:255',
+    //         'description' => 'nullable|string|max:65535',
+    //         'completed' => 'nullable|boolean',
+    //         'duration' => 'nullable|numeric|min:0',
+    //     ]);
+
+    //     $task = Task::findOrFail($taskId);
+    //     $task->update($validatedData);
+
+    //     return back()->with('success', 'Tarea actualizada exitosamente.');
+    // }
+
+    public function update(Request $request, $id)
 {
     $validatedData = $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'duration' => 'nullable|numeric|min:0',
-        'completed' => 'boolean',
-        // ... otras validaciones ...
+        'start_date' => 'required|date',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'priority' => 'required|in:low,medium,high,urgent',
+        // 'duration' => 'required|numeric|min:0',
     ]);
 
-    $task = Task::create([
-        'created_by' => Auth::id(),
-        'title' => $validatedData['title'],
-        'description' => $validatedData['description'],
-        'duration' => $validatedData['duration'],
-        'completed' => $validatedData['completed'] ?? false,
-        // ... otros campos ...
-    ]);
+    $task = Task::findOrFail($id);
+    $task->update($validatedData);
 
-    if ($validatedData['duration']) {
-        WorkHours::create([
-            'user_id' => Auth::id(),
-            'work_date' => now()->toDateString(),
-            'hours_worked' => $validatedData['duration'],
-            'approved' => false,
-        ]);
-    }
-
-    return back()->with('success', 'Tarea creada exitosamente.');
+    return back()->with('success', 'Tarea actualizada exitosamente.');
 }
-
-
-    public function update(Request $request, $taskId)
-    {
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:65535',
-            'completed' => 'nullable|boolean',
-            'duration' => 'nullable|numeric|min:0',
-        ]);
-
-        $task = Task::findOrFail($taskId);
-        $task->update($validatedData);
-
-        return back()->with('success', 'Tarea actualizada exitosamente.');
-    }
 
     // public function destroy($id)
     // {
@@ -172,16 +227,38 @@ public function store(Request $request)
     }
 
 
+    public function toggleCompletion(Request $request, $taskId)
+{
+    \Log::info('Toggling completion for task ID: ' . $taskId);
 
-    public function toggleCompletion($taskId)
-    {
+    try {
         $task = Task::findOrFail($taskId);
+        
+        \Log::info('Current task data: ' . json_encode($task->toArray()));
+
         $task->completed = !$task->completed;
-        $task->save();
-        return response()->json(['success' => true, 'task' => $task]);
+        $result = $task->save();
+
+        \Log::info('Update result: ' . ($result ? 'true' : 'false'));
+        \Log::info('New task data: ' . json_encode($task->fresh()->toArray()));
+
+        if (!$result) {
+            throw new \Exception('Failed to update task');
+        }
+
+        return response()->json([
+            'success' => true,
+            'completed' => $task->completed
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Error toggling task completion: ' . $e->getMessage());
+        \Log::error($e->getTraceAsString());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error al actualizar el estado de la tarea: ' . $e->getMessage()
+        ], 500);
     }
-
-
+}
 
 
     public function addComment(Request $request, $taskId)
