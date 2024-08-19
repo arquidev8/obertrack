@@ -9,6 +9,7 @@ use App\Http\Controllers\WorkHoursController;
 use App\Http\Controllers\WorkHourApprovalController;
 use App\Http\Controllers\TaskController; // Asegúrate de importar TaskController
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\EmployerTaskController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -28,6 +29,58 @@ Route::delete('/tareas/{taskId}', [TaskController::class, 'destroy'])->name('tar
 
 Route::get('/empleadores/tareas-asignadas', [DashboardController::class, 'verTareasEmpleados'])->middleware(['auth'])->name('empleadores.tareas-asignadas');
 Route::get('/grafico-tareas', [DashboardController::class, 'verTareasEmpleados']);
+
+
+Route::post('/empleador/crear-tarea', [DashboardController::class, 'crearTareaParaEmpleado'])->name('empleador.crear-tarea');
+
+
+
+Route::middleware(['auth'])->group(function () {
+    // Rutas para tareas de empleador
+
+    Route::get('/empleador/tareas', [DashboardController::class, 'verTareasEmpleados'])->name('empleador.tareas.index');
+    Route::get('/empleador/tareas/crear', [TaskController::class, 'createForEmployee'])->name('empleador.tareas.create');
+    Route::post('/empleador/tareas', [TaskController::class, 'storeForEmployee'])->name('empleador.tareas.store');
+    Route::get('/empleador/tareas/{task}/editar', [TaskController::class, 'edit'])->name('empleador.tareas.edit');
+    Route::put('/empleador/tareas/{task}', [TaskController::class, 'update'])->name('empleador.tareas.update');
+    Route::delete('/empleador/tareas/{task}', [TaskController::class, 'destroy'])->name('empleador.tareas.destroy');
+
+
+
+     // Nuevas rutas para tareas del empleador
+     Route::post('/empleador/tareas/{taskId}/toggle-completion', [TaskController::class, 'toggleEmployerTaskCompletion'])
+     ->name('empleador.tareas.toggle-completion');
+
+ // Rutas para comentarios del empleador
+    Route::post('/empleador/comments', [CommentController::class, 'storeEmployerComment'])->name('empleador.comments.store');
+    Route::put('/empleador/comments/{id}', [CommentController::class, 'updateEmployerComment'])->name('empleador.comments.update');
+    Route::delete('/empleador/comments/{id}', [CommentController::class, 'destroyEmployerComment'])->name('empleador.comments.destroy');
+
+    // Si necesitas una ruta específica para editar tareas del empleador
+    Route::get('/empleador/tareas/{task}/editar', [TaskController::class, 'editEmployerTask'])
+        ->name('empleador.tareas.edit');
+    Route::put('/empleador/tareas/{task}', [TaskController::class, 'updateEmployerTask'])
+        ->name('empleador.tareas.update');
+
+
+            //SE CREO ESTE CONTROLADORAS RUTAS PARA LOS COMENTS DE LA EMPRESA PERO AUIN NO FUNCIONA
+
+// Route::prefix('empleador')->name('empleador.')->group(function () {
+//     Route::resource('tareas', EmployerTaskController::class);
+//     Route::post('tareas/{task}/toggle-completion', [EmployerTaskController::class, 'toggleCompletion'])->name('tareas.toggle-completion');
+//     Route::post('tareas/{task}/comments', [EmployerTaskController::class, 'addComment'])->name('tareas.comments.add');
+//     Route::put('tareas/{task}/comments/{comment}', [EmployerTaskController::class, 'updateComment'])->name('tareas.comments.update');
+//     Route::delete('tareas/{task}/comments/{comment}', [EmployerTaskController::class, 'deleteComment'])->name('tareas.comments.delete');
+// });
+
+
+Route::post('/empleador/tareas/{taskId}/comments', [EmployerTaskController::class, 'addComment'])->name('empleador.tareas.comments.add');
+Route::put('/empleador/tareas/{taskId}/comments/{commentId}', [EmployerTaskController::class, 'updateComment'])->name('empleador.tareas.comments.update');
+Route::delete('/empleador/tareas/{taskId}/comments/{commentId}', [EmployerTaskController::class, 'deleteComment'])->name('empleador.tareas.comments.delete');
+
+});
+
+
 
 
 // Route::middleware(['auth'])->group(function () {

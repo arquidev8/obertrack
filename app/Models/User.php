@@ -103,4 +103,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserSignature::class);
     }
+
+
+    // En el modelo User
+
+// Tareas creadas por el usuario
+public function createdTasks()
+{
+    return $this->hasMany(Task::class, 'created_by');
+}
+
+// Tareas asignadas al usuario
+public function assignedTasks()
+{
+    return $this->hasMany(Task::class, 'visible_para', 'id');
+}
 }

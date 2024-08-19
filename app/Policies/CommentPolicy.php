@@ -7,13 +7,23 @@ use App\Models\User;
 
 class CommentPolicy
 {
-    public function update(User $user, Comment $comment)
-    {
-        return $user->id === $comment->user_id;
-    }
+    // public function update(User $user, Comment $comment)
+    // {
+    //     return $user->id === $comment->user_id;
+    // }
 
-    public function delete(User $user, Comment $comment)
-    {
-        return $user->id === $comment->user_id || $user->id === $comment->task->created_by;
-    }
+    // public function delete(User $user, Comment $comment)
+    // {
+    //     return $user->id === $comment->user_id || $user->id === $comment->task->created_by;
+    // }
+
+    public function update(User $user, Comment $comment)
+{
+    return $user->id === $comment->user_id;
+}
+
+public function delete(User $user, Comment $comment)
+{
+    return $user->id === $comment->user_id || $user->id === $comment->task->user_id;
+}
 }

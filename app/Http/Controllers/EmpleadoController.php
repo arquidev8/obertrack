@@ -27,10 +27,30 @@ class EmpleadoController extends Controller
     //     return view('empleados.crear_tarea', compact('tareas'));
     // }
 
-    public function create()
+
+
+//     public function create()
+// {
+//     $tareas = Task::where('created_by', auth()->id())->get();
+//     return view('empleados.crear_tarea', compact('tareas'));
+// }
+
+
+
+public function create()
 {
-    $tareas = Task::where('created_by', auth()->id())->get();
-    return view('empleados.crear_tarea', compact('tareas'));
+    $user = auth()->user(); // Obtener el usuario autenticado
+
+    // Obtener tareas creadas por el empleado
+    $tareasCreadas = Task::where('created_by', $user->id)->get();
+
+    $tareas = $tareasCreadas;
+
+    // Obtener tareas asignadas al empleado
+    $tareasAsignadas = Task::where('visible_para', $user->id)->with('visibleTo')->get();
+
+    // Pasar ambas colecciones a la vista
+    return view('empleados.crear_tarea', compact('tareas', 'tareasAsignadas'));
 }
 
 

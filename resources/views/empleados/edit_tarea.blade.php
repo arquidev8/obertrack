@@ -1,5 +1,4 @@
 
-
 <style>
     .task-card {
         background-color: #ffffff;
@@ -125,7 +124,45 @@
 <div class="bg-gray-100 min-h-screen py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">Mis Tareas</h1>
+
+
+
+        <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Tareas Asignadas</h1>
+
+    @if(session('success'))
+        <div class="bg-green-500 text-white p-2 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @foreach($tareasAsignadas as $tarea)
+            <div class="bg-white shadow-md rounded-lg p-4">
+                <h5 class="text-lg font-semibold">{{ $tarea->title }}</h5>
+                <h6 class="text-sm text-gray-600 mb-2">Asignado a: {{ $tarea->visibleTo->name ?? 'N/A' }}</h6>
+                <p class="text-gray-700">{{ Str::limit($tarea->description, 100) }}</p>
+                <p class="text-gray-500 mt-2">
+                    <small>
+                        Inicio: {{ $tarea->start_date->format('d/m/Y') }} <br>
+                        Fin: {{ $tarea->end_date->format('d/m/Y') }}
+                    </small>
+                </p>
+                <p class="mt-2">
+                    Estado: 
+                    <span class="inline-block px-2 py-1 text-xs font-semibold rounded-full 
+                        {{ $tarea->completed ? 'bg-green-500 text-white' : 'bg-gray-300 text-gray-700' }}">
+                        {{ $tarea->completed ? 'Completada' : 'Pendiente' }}
+                    </span>
+                </p>
+            </div>
+        @endforeach
+    </div>
+
+</div>
+    
         
+
         <div class="space-y-6">
             @foreach($tareas as $tarea)
                 @if($tarea->created_by == auth()->id())
