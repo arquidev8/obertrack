@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
-
+use Illuminate\Pagination\Paginator; 
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
 
     protected $policies = [
         Comment::class => CommentPolicy::class,
+        
     ];
 
     /**
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Establecer el locale en español
         Carbon::setLocale('es');
+        Paginator::defaultView('pagination::tailwind');  
     }
 
 }

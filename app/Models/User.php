@@ -25,9 +25,9 @@ class User extends Authenticatable
         'password',
         'tipo_usuario',
         'empleador_id',
-        'signature', 
+        'is_manager',
+        'signature',
     ];
-
 
 
     /**
@@ -50,6 +50,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_manager' => 'boolean',
         ];
     }
 
@@ -107,15 +108,54 @@ class User extends Authenticatable
 
     // En el modelo User
 
-// Tareas creadas por el usuario
-public function createdTasks()
-{
-    return $this->hasMany(Task::class, 'created_by');
-}
+    // Tareas creadas por el usuario
+    public function createdTasks()
+    {
+        return $this->hasMany(Task::class, 'created_by');
+    }
 
-// Tareas asignadas al usuario
-public function assignedTasks()
-{
-    return $this->hasMany(Task::class, 'visible_para', 'id');
-}
+    // Tareas asignadas al usuario
+    public function assignedTasks()
+    {
+        return $this->hasMany(Task::class, 'visible_para', 'id');
+    }
+
+
+
+
+    //para managers
+    // Método para verificar si el usuario puede asignar tareas
+    public function puedeAsignarTareas()
+    {
+        return $this->tipo_usuario === 'empleador' || $this->is_manager;
+    }
+
+    // Método para promover a un empleado a manager
+    public function promoverAManager()
+    {
+        if ($this->tipo_usuario === 'empleado') {
+            $this->is_manager = true;
+            $this->save();
+        }
+    }
+
+    // Método para degradar a un manager a empleado regular
+    public function degradarDeManager()
+    {
+        if ($this->tipo_usuario === 'empleado' && $this->is_manager) {
+            $this->is_manager = false;
+            $this->save();
+        }
+    }
+
+    public function compañerosDeTrabajo()
+    {
+        if ($this->tipo_usuario === 'empleador') {
+            return $this->empleados;
+        } else {
+            return User::where('empleador_id', $this->empleador_id)
+                       ->where('id', '!=', $this->id)
+                       ->get();
+        }
+    }
 }

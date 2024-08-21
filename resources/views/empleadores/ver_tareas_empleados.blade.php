@@ -30,52 +30,66 @@
 
 
 
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Crear Nueva Tarea</h2>
-            <form action="{{ route('empleador.crear-tarea') }}" method="POST" class="space-y-4">
-                @csrf
-                <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
-                    <input type="text" id="title" name="title" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                </div>
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-                    <textarea id="description" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de inicio</label>
-                        <input type="date" id="start_date" name="start_date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                    <div>
-                        <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de fin</label>
-                        <input type="date" id="end_date" name="end_date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    </div>
-                </div>
-                <div>
-                    <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</label>
-                    <select id="priority" name="priority" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        <option value="low">Baja</option>
-                        <option value="medium">Media</option>
-                        <option value="high">Alta</option>
-                        <option value="urgent">Urgente</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="employee_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Asignar a</label>
-                    <select id="employee_id" name="employee_id" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                        @foreach($empleados as $empleado)
-                            <option value="{{ $empleado->id }}">{{ $empleado->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150">
-                        Crear Tarea
-                    </button>
-                </div>
-            </form>
+        <div class="max-w-6xl mb-10 mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+    <div class="bg-gradient-to-r from-indigo-500 to-blue-800 p-6">
+        <h2 class="text-3xl font-bold text-white">Crear Nueva Tarea</h2>
+        <p class="mt-2 text-indigo-100">Complete los detalles para asignar una nueva tarea a tus profesional.</p>
+    </div>
+    <form action="{{ route('empleador.crear-tarea') }}" method="POST" class="p-6 space-y-6">
+        @csrf
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="col-span-2">
+                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título de la Tarea</label>
+                <input type="text" id="title" name="title" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-200"
+                    placeholder="Ingrese el título de la tarea">
+            </div>
+            <div class="col-span-2">
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción</label>
+                <textarea id="description" name="description" rows="4" 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-200"
+                    placeholder="Describa los detalles de la tarea"></textarea>
+            </div>
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Inicio</label>
+                <input type="date" id="start_date" name="start_date" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-200">
+            </div>
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha de Finalización</label>
+                <input type="date" id="end_date" name="end_date" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-200">
+            </div>
+            <div>
+                <label for="priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prioridad</label>
+                <select id="priority" name="priority" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-200">
+                    <option value="" disabled selected>Seleccione la prioridad</option>
+                    <option value="low">Baja</option>
+                    <option value="medium">Media</option>
+                    <option value="high">Alta</option>
+                    <option value="urgent">Urgente</option>
+                </select>
+            </div>
+            <div>
+                <label for="employee_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asignar a</label>
+                <select id="employee_id" name="employee_id" required 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white transition duration-200">
+                    <option value="" disabled selected>Seleccione un empleado</option>
+                    @foreach($empleados as $empleado)
+                        <option value="{{ $empleado->id }}">{{ $empleado->name }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
+        <div class="flex justify-end mt-6">
+            <button type="submit" 
+                class="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200 transform hover:-translate-y-1">
+                Crear Tarea
+            </button>
+        </div>
+    </form>
+</div>
 
 
         
@@ -100,11 +114,7 @@
         </div>
 
 
-
-
-
-
-        <style>
+<style>
     .task-card {
         background-color: #ffffff;
         border-radius: 0.5rem;

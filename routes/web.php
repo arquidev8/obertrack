@@ -10,6 +10,8 @@ use App\Http\Controllers\WorkHourApprovalController;
 use App\Http\Controllers\TaskController; // Asegúrate de importar TaskController
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\EmployerTaskController;
+use App\Http\Controllers\ManagerTaskController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -80,6 +82,23 @@ Route::delete('/empleador/tareas/{taskId}/comments/{commentId}', [EmployerTaskCo
 
 });
 
+
+
+
+//MANAGERS
+Route::middleware(['auth'])->group(function () {
+    Route::get('/manager/tasks', [ManagerTaskController::class, 'index'])->name('manager.tasks.index');
+    Route::get('/manager/tasks/create', [ManagerTaskController::class, 'create'])->name('manager.tasks.create');
+    Route::post('/manager/tasks', [ManagerTaskController::class, 'store'])->name('manager.tasks.store');
+
+
+      // Añade estas nuevas rutas
+      Route::get('/manager/tasks/{task}/edit', [ManagerTaskController::class, 'edit'])->name('manager.tasks.edit');
+      Route::put('/manager/tasks/{task}', [ManagerTaskController::class, 'update'])->name('manager.tasks.update');
+      Route::delete('/manager/tasks/{task}', [ManagerTaskController::class, 'destroy'])->name('manager.tasks.destroy');
+
+
+});
 
 
 
@@ -164,6 +183,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/empleados/crear-tarea', [EmpleadoController::class, 'create'])->name('empleados.crear-tarea');
 
+
+
+    Route::put('/profile/{user}/promover-manager', [ProfileController::class, 'promoverAManager'])->name('profile.promover-manager');
+    Route::put('/profile/{user}/degradar-manager', [ProfileController::class, 'degradarDeManager'])->name('profile.degradar-manager');
 });
 
 require __DIR__.'/auth.php';

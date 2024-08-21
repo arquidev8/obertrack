@@ -18,8 +18,9 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('tipo_usuario', ['empleado', 'empleador']);
-            $table->unsignedBigInteger('empleador_id')->nullable(); // Campo para almacenar el ID del empleador
-            $table->foreign('empleador_id')->references('id')->on('users'); // Clave externa que hace referencia a la misma tabla
+            $table->unsignedBigInteger('empleador_id')->nullable();
+            $table->foreign('empleador_id')->references('id')->on('users');
+            $table->boolean('is_manager')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
