@@ -32,7 +32,7 @@
                                         <a href="{{ route('manager.tasks.index') }}" 
                                            class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
                                             <span class="material-icons-outlined mr-3 text-blue-400">supervisor_account</span>
-                                            {{ __('Tareas Asignadas (Manager)') }}
+                                            {{ __('Asignar tareas a mi equipo') }}
                                         </a>
                                     @endif
                                 @elseif (auth()->user()->tipo_usuario == 'empleador')
@@ -91,12 +91,24 @@
                         @if(auth()->user()->is_manager)
                             <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="150">
                                 <div class="p-8 bg-purple-600">
-                                    <h2 class="text-3xl font-bold text-white mb-4">Tareas Asignadas (Manager)</h2>
-                                    <p class="text-gray-100 text-lg mb-6">Gestiona las tareas que has asignado a tus subordinados.</p>
+                                    <h2 class="text-3xl font-bold text-white mb-4">Tareas Asignadas a mi equipo</h2>
+                                    <p class="text-gray-100 text-lg mb-6">Gestiona las tareas que has asignado a tus profesionales.</p>
                                     <a href="{{ route('manager.tasks.index') }}" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver Tareas Asignadas</a>
                                 </div>
                             </div>
                         @endif
+
+                        @if(auth()->user()->tipo_usuario == 'empleado')
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="150">
+                                <div class="p-8 bg-purple-600">
+                                    <h2 class="text-3xl font-bold text-white mb-4">Tareas asignadas por tu manager</h2>
+                                    <p class="text-gray-100 text-lg mb-6">Gestiona las tareas que tu manager te ha asignado</p>
+                                    <a href="{{ route('empleados.tasks.index') }}" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver Tareas Asignadas</a>
+                                </div>
+                            </div>
+                        @endif
+
+
                     @elseif (auth()->user()->tipo_usuario == 'empleador')
                         <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="100">
                             <div class="p-8 bg-green-600">

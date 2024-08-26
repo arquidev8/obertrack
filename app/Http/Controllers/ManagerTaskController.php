@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Gate as GateFacade;
 use Illuminate\Support\Facades\Validator;
-
+use App\Models\Comment;
+use App\Notifications\NewTaskAssigned;
 
 
 class ManagerTaskController extends Controller
@@ -69,6 +70,10 @@ class ManagerTaskController extends Controller
             'priority' => $request->priority,
             'completed' => false,
         ]);
+
+        // Enviar notificación al usuario asignado
+        $assignedUser = User::find($request->visible_para);
+        $assignedUser->notify(new NewTaskAssigned($task));
 
         return redirect()->route('manager.tasks.index')->with('success', 'Tarea creada y asignada exitosamente.');
     }
@@ -147,5 +152,58 @@ class ManagerTaskController extends Controller
 
         return redirect()->route('manager.tasks.index')
                          ->with('success', 'Tarea eliminada exitosamente.');
+    }
+
+
+
+
+
+
+    public function addComment(Request $request, Task $task)
+    {
+        $request->validate([
+            'content' => 'required|string'
+        ]);
+    
+        $comment = new Comment([
+            'content' => $request->content,
+            'user_id' => Auth::id(),
+        ]);
+    
+        $task->comments()->save($comment);
+    
+        return response()->json([
+            'success' => true,
+            'comment' => $comment->load('user')
+        ]);
+    }
+    
+    public function updateComment(Request $request, Comment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            abort(403);
+        }
+    
+        $request->validate([
+            'content' => 'required|string'
+        ]);
+    
+        $comment->update(['content' => $request->content]);
+    
+        return response()->json([
+            'success' => true,
+            'comment' => $comment->load('user')
+        ]);
+    }
+    
+    public function deleteComment(Comment $comment)
+    {
+        if ($comment->user_id !== Auth::id()) {
+            abort(403);
+        }
+    
+        $comment->delete();
+    
+        return response()->json(['success' => true]);
     }
 }

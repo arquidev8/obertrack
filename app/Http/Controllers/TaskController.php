@@ -21,6 +21,7 @@ class TaskController extends Controller
         } else {
             $tasks = Task::where('visible_para', $user->id)->get();
         }
+        
         return view('tareas.index', compact('tasks'));
     }
 

@@ -4,11 +4,11 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <!-- <div class="shrink-0 flex items-center">
+                <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
                     </a>
-                </div> -->
+                </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -21,7 +21,7 @@
                         {{ __('Chat') }}
                     </x-nav-link>
                 </div>
-                   <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @if(auth()->user()->tipo_usuario === 'empleador')
                         <x-nav-link :href="route('empleadores.tareas-asignadas')" :active="request()->routeIs('empleadores.tareas-asignadas')">
                             {{ __('Registro de Horas') }}
@@ -32,6 +32,34 @@
                         </x-nav-link>
                     @endif
                 </div>
+
+                <div class="hidden space-x-8 sm:-my-px sm:ms-4 sm:flex">
+                    @if(auth()->user()->tipo_usuario === 'empleado' && auth()->user()->is_manager)
+                        <x-nav-link :href="route('manager.tasks.index')" :active="request()->routeIs('manager.tasks.index')">
+                            {{ __('Asignar tareas a mi equipo') }}
+                        </x-nav-link>
+                    @endif
+                </div>
+
+                
+                <div class="hidden space-x-8 sm:-my-px sm:ms-4 sm:flex">
+                    @if(auth()->user()->tipo_usuario === 'empleado')
+                        <x-nav-link :href="route('empleados.crear-tarea')" :active="request()->routeIs('empleados.crear-tarea')">
+                            {{ __('Reporte de actividades generales') }}
+                        </x-nav-link>
+                    @endif
+                </div>
+
+                <div class="hidden space-x-2 sm:-my-px sm:ms-8 sm:flex">
+                    @if(auth()->user()->tipo_usuario === 'empleado')
+                        <x-nav-link :href="route('empleados.tasks.index')" :active="request()->routeIs('empleados.tasks.index')">
+                            {{ __('Asignaciones de equipo') }}
+                        </x-nav-link>
+                    @endif
+                </div>
+
+
+                
             </div>
 
             <!-- Settings Dropdown -->

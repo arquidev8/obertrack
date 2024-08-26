@@ -238,7 +238,7 @@
 
 
 <!-- LA VISTA PARA MANEJAR LAS TAREAS CREADAS POR LA EMPRESA -->
-<div>
+<!-- <div>
 <meta name="csrf-token" content="{{ csrf_token() }}">
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Tareas Asignadas por mí</h2>
     <div id="employerTaskList" class="space-y-6">
@@ -367,7 +367,162 @@
             </div>
         @endforeach
     </div>
+</div> -->
+
+<div class="bg-gray-100 dark:bg-gray-900 p-8 rounded-xl shadow-lg">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <h2 class="text-3xl font-black text-blue-500 dark:text-blue-500 mb-8 pb-4 border-b-2 border-blue-500">Asignaciones a mi equipo</h2>
+    <div id="employerTaskList" class="space-y-8">
+        @foreach($tareasEmpleador as $tarea)
+            <div id="task-{{ $tarea->id }}" class="task-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:scale-102 hover:shadow-xl">
+                <div class="task-header flex justify-between items-center p-6 bg-indigo-50 dark:bg-indigo-900">
+                    <h3 class="text-2xl font-black text-gray-600 dark:text-white">{{ $tarea->title }}</h3>
+                    <div class="flex space-x-3">
+                        <span class="priority-badge priority-{{ $tarea->priority }} px-3 py-1 rounded-full text-sm font-medium">
+                            {{ ucfirst($tarea->priority) }}
+                        </span>
+                        <span id="status-badge-{{ $tarea->id }}" class="status-badge {{ $tarea->completed ? 'status-completed' : 'status-in-progress' }} px-3 py-1 rounded-full text-sm font-medium">
+                            {{ $tarea->completed ? 'Completada' : 'En Progreso' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="task-body p-6">
+                    <p class="text-gray-600 font-medium dark:text-gray-300 mb-4">Descripción: {{ $tarea->description }}</p>
+                    <div class="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400">
+                        <span class="inline-flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i>
+                           Rango de fecha: {{ $tarea->start_date->format('d/m/Y') }} - {{ $tarea->end_date->format('d/m/Y') }}
+                        </span>
+                        <span class="inline-flex items-center">
+                            <i class="fas fa-user mr-2 text-indigo-500"></i>
+                            Asignado a: {{ $tarea->visibleTo->name ?? 'Usuario desconocido' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="task-footer flex flex-wrap gap-3 p-6 bg-gray-50 dark:bg-gray-700">
+                    <button onclick="toggleEmployerTaskCompletion({{ $tarea->id }})" 
+                            id="toggle-button-{{ $tarea->id }}" 
+                            class="task-button {{ $tarea->completed ? 'toggle-status-button-completed' : 'toggle-status-button-in-progress' }} px-4 py-2 rounded-md transition duration-300 ease-in-out">
+                        {{ $tarea->completed ? 'Marcar como En Progreso' : 'Marcar como Completada' }}
+                    </button>
+                    <button onclick="showEmployerEditFields({{ $tarea->id }})" class="task-button bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-300 ease-in-out">
+                        <i class="fas fa-edit mr-2"></i>Editar
+                    </button>
+                    <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de querer eliminar esta tarea?');" class="inline-block">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="task-button bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition duration-300 ease-in-out">
+                            <i class="fas fa-trash-alt mr-2"></i>Eliminar
+                        </button>
+                    </form>
+                    <button onclick="toggleEmployerComments({{ $tarea->id }})" class="task-button bg-gray-300 hover:bg-blue-500 hover:text-white text-black px-4 py-2 rounded-md transition duration-300 ease-in-out">
+                        <i class="fas fa-comments mr-2"></i>
+                        <span id="commentButtonText-{{ $tarea->id }}">Mostrar Comentarios</span>
+                        <span id="commentCount-{{ $tarea->id }}" class="ml-2 bg-white text-indigo-500 px-2 py-1 rounded-full text-xs font-bold">{{ $tarea->comments->count() }}</span>
+                    </button>
+                </div>
+                
+                <form id="editForm{{ $tarea->id }}" style="display:none;" action="{{ route('tareas.update', $tarea->id) }}" method="POST" class="edit-form p-4 bg-gray-100 dark:bg-gray-700">
+                    @csrf
+                    @method('PUT')
+                    <div class="space-y-4">
+                        <div>
+                            <label for="title{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
+                            <input type="text" id="title{{ $tarea->id }}" name="title" value="{{ $tarea->title }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="description{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                            <textarea id="description{{ $tarea->id }}" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">{{ $tarea->description }}</textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="start_date{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de inicio</label>
+                                <input type="date" id="start_date{{ $tarea->id }}" name="start_date" value="{{ $tarea->start_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                            </div>
+                            <div>
+                                <label for="end_date{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de fin</label>
+                                <input type="date" id="end_date{{ $tarea->id }}" name="end_date" value="{{ $tarea->end_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="priority{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</label>
+                            <select id="priority{{ $tarea->id }}" name="priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                                <option value="low" {{ $tarea->priority == 'low' ? 'selected' : '' }}>Baja</option>
+                                <option value="medium" {{ $tarea->priority == 'medium' ? 'selected' : '' }}>Media</option>
+                                <option value="high" {{ $tarea->priority == 'high' ? 'selected' : '' }}>Alta</option>
+                                <option value="urgent" {{ $tarea->priority == 'urgent' ? 'selected' : '' }}>Urgente</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Guardar cambios
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="commentsSection-{{ $tarea->id }}" class="hidden bg-gray-50 dark:bg-gray-700 p-4">
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Comentarios</h4>
+                    <div id="commentsList-{{ $tarea->id }}" class="space-y-4 mb-6">
+                        @foreach ($tarea->comments as $comment)
+                            <div id="comment-{{ $comment->id }}" class="bg-white dark:bg-gray-600 p-4 rounded-lg shadow-sm">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-grow">
+                                        <p class="text-sm text-gray-800 dark:text-gray-200">
+                                            <span class="font-medium text-indigo-600 dark:text-indigo-400">{{ $comment->user->name }}:</span> 
+                                            <span id="commentContent-{{ $comment->id }}">{{ $comment->content }}</span>
+                                        </p>
+                                        <small class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</small>
+                                    </div>
+                                    @if($comment->user_id == auth()->id())
+                                        <div class="flex space-x-2">
+                                            <button onclick="editEmployerComment({{ $comment->id }})" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs transition duration-150 ease-in-out">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </button>
+                                            <button onclick="deleteEmployerComment({{ $comment->id }}, {{ $tarea->id }})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs transition duration-150 ease-in-out">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <form onsubmit="addEmployerTaskComment(event, {{ $tarea->id }})" class="mt-4">
+                        @csrf
+                        <div class="flex items-start space-x-4">
+                            <textarea id="newComment-{{ $tarea->id }}" rows="3" class="flex-grow p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Añadir un comentario..."></textarea>
+                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out">
+                                <i class="fas fa-paper-plane mr-2"></i>Comentar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endforeach
+    </div>
 </div>
+
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+    }
+    .task-card:hover {
+        transform: translateY(-5px);
+    }
+    .priority-badge {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .priority-low { background-color: #E5F6FD; color: #0369A1; }
+    .priority-medium { background-color: #FEF3C7; color: #92400E; }
+    .priority-high { background-color: #FEE2E2; color: #B91C1C; }
+    .priority-urgent { background-color: #FECACA; color: #7F1D1D; }
+    .status-completed { background-color: #D1FAE5; color: #065F46; }
+    .status-in-progress { background-color: #E0E7FF; color: #a67616; }
+    .toggle-status-button-completed { background-color: #10B981; color: white; }
+    .toggle-status-button-completed:hover { background-color: #059669; }
+    .toggle-status-button-in-progress { background-color: #ffab5c; color: white; }
+    .toggle-status-button-in-progress:hover { background-color: black; }
+</style>
 
 <script>
 
@@ -691,7 +846,7 @@ function showAlert(message, type) {
       
 
 
-        <div id="taskList" class="space-y-4  mt-20">
+        <!-- <div id="taskList" class="space-y-4  mt-20">
             <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-6">Tareas creadas por mis profesionales</h2>
             @foreach($tareas as $tarea)
                 <div id="task-{{ $tarea->id }}" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden
@@ -779,7 +934,122 @@ function showAlert(message, type) {
             @endforeach
         </div>
         
+ -->
 
+
+ <div class="bg-gray-100 dark:bg-gray-900 p-8 rounded-xl shadow-lg mt-20">
+    <h2 class="text-3xl font-black text-blue-500 dark:text-blue-500 mb-8 pb-4 border-b-2 border-blue-500">Actividades del equipo</h2>
+
+    
+    <div id="taskList" class="space-y-8">
+        @foreach($tareas as $tarea)
+            <div id="task-{{ $tarea->id }}" class="task-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:scale-102 hover:shadow-xl
+                        @if($tarea->priority == 'urgent') border-l-4 border-red-500
+                        @elseif($tarea->priority == 'high') border-l-4 border-orange-500
+                        @elseif($tarea->priority == 'medium') border-l-4 border-yellow-500
+                        @else border-l-4 border-blue-500
+                        @endif">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class=" text-2xl font-black text-gray-700 dark:text-white">{{ $tarea->title }}</h3>
+                        <div class="flex items-center space-x-3 ml-2">
+                
+                            <span class="priority-badge px-3 py-1 rounded-full text-sm font-medium
+                                         @if($tarea->priority == 'urgent') priority-urgent
+                                         @elseif($tarea->priority == 'high') priority-high
+                                         @elseif($tarea->priority == 'medium') priority-medium
+                                         @else priority-low
+                                         @endif">
+                                   {{ ucfirst($tarea->priority) }}
+                            </span>
+                            <button onclick="toggleCompletion({{ $tarea->id }})" class="text-gray-500 hover:text-green-500 focus:outline-none transition duration-300 ease-in-out">
+                                <i id="complete-icon-{{ $tarea->id }}" class="fas fa-check-circle text-3xl {{ $tarea->completed ? 'text-green-500' : '' }}"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-600 mb-4 ml-2"><span class="text-gray-600 font-bold">Descripción: </span>{{ $tarea->description }}</p>
+                    <div class="flex flex-wrap items-center text-sm text-gray-500 dark:text-gray-400 space-x-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-indigo-500"></i>
+                            <span><span class="text-gray-600 font-bold">Rango de fechas:</span> {{ $tarea->start_date->format('d/m/Y') }} al {{ $tarea->end_date->format('d/m/Y') }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-user mr-2 text-indigo-500"></i>
+                            <span><span class="text-gray-600 font-bold">Creado por:</span> {{ $tarea->createdBy->name ?? 'Usuario desconocido' }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-700 px-6 py-4 flex justify-between items-center">
+                    <div class="text-sm">
+                        <span class="font-medium text-gray-700 dark:text-gray-300">Estado:</span>
+                        <span id="status-{{ $tarea->id }}" class="ml-2 px-2 py-1 rounded-full text-sm font-medium {{ $tarea->completed ? 'status-completed' : 'status-in-progress' }}">
+                            {{ $tarea->completed ? 'Completada' : 'En progreso' }}
+                        </span>
+                    </div>
+                    <button onclick="toggleComments({{ $tarea->id }})" class="task-button bg-gray-300 hover:bg-blue-500 hover:text-white text-black px-4 py-2 rounded-md transition duration-300 ease-in-out">
+                        <i class="fas fa-comments mr-2"></i>Mostrar comentarios
+                    </button>
+                </div>
+                <div id="comments-{{ $tarea->id }}" class="hidden bg-gray-50 dark:bg-gray-700 p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Comentarios</h4>
+                    <div id="commentsList-{{ $tarea->id }}" class="space-y-4 mb-6">
+                        @foreach ($tarea->comments as $comment)
+                            <div id="comment-{{ $comment->id }}" class="bg-white dark:bg-gray-600 p-4 rounded-lg shadow-sm">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex-grow">
+                                        <p class="text-sm text-gray-800 dark:text-gray-200">
+                                            <span class="font-medium text-indigo-600 dark:text-indigo-400">{{ $comment->user->name }}:</span> 
+                                            <span id="commentContent-{{ $comment->id }}">{{ $comment->content }}</span>
+                                        </p>
+                                        <small class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</small>
+                                    </div>
+                                    @if($comment->user_id == auth()->id())
+                                        <div class="flex space-x-2">
+                                            <button onclick="editComment({{ $comment->id }})" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs transition duration-150 ease-in-out">
+                                                <i class="fas fa-edit"></i> Editar
+                                            </button>
+                                            <button onclick="deleteComment({{ $comment->id }}, {{ $tarea->id }})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs transition duration-150 ease-in-out">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <form onsubmit="addComment(event, {{ $tarea->id }})" class="mt-4">
+                        @csrf
+                        <div class="flex items-start space-x-4">
+                            <textarea id="newComment-{{ $tarea->id }}" rows="3" class="flex-grow p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Añadir un comentario..."></textarea>
+                            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out">
+                                <i class="fas fa-paper-plane mr-2"></i>Comentar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
+
+<style>
+    .task-card {
+        transition: all 0.3s ease;
+    }
+    .task-card:hover {
+        transform: translateY(-5px);
+    }
+    .priority-badge {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .priority-urgent { background-color: #FEE2E2; color: #991B1B; }
+    .priority-high { background-color: #FEF3C7; color: #92400E; }
+    .priority-medium { background-color: #E0E7FF; color: #3730A3; }
+    .priority-low { background-color: #E5F6FD; color: #0369A1; }
+    .status-completed { background-color: #D1FAE5; color: #065F46; }
+    .status-in-progress { background-color: #FEF3C7; color: #92400E; }
+</style>
 
         
 <script>
@@ -1047,7 +1317,7 @@ function updateComment(commentId, newContent) {
 
 
 
-<div class="py-12 bg-gray-100 dark:bg-white">
+<div class="py-12 bg-gray-100 dark:bg-white p-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         @if(!empty($pendingWeeks))
             <h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100 text-center">Semanas Pendientes de Aprobación</h2>
@@ -1107,7 +1377,7 @@ function updateComment(commentId, newContent) {
             @endforeach
         @endif
 
-        <h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100 text-center">Semana Actual</h2>
+        <h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100 text-center">Resumen Semana Actual</h2>
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
             <div class="bg-green-600 dark:bg-green-800 p-4">
                 <h3 class="text-xl font-semibold text-white">{{ $weekStart->format('d/m/Y') }} al {{ $weekStart->copy()->endOfWeek(Carbon\Carbon::FRIDAY)->format('d/m/Y') }}</h3>
@@ -1238,7 +1508,7 @@ function updateComment(commentId, newContent) {
     </div>
 
 
-<div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 shadow-2xl rounded-xl overflow-hidden mb-8 p-12">
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 shadow-2xl rounded-xl overflow-hidden mb-8 p-16">
     <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-2 text-center">
         Resumen de {{ $currentMonth->translatedFormat('F Y') }}
     </h2>

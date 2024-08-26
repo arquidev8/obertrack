@@ -25,7 +25,7 @@
                 <div class="p-4 sm:p-8 bg-white dark:bg-gray-800 shadow sm:rounded-lg">
                     <div class="max-w-xl">
                         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                            {{ __('Mis Empleados') }}
+                            {{ __('Mis Profesionales') }}
                         </h2>
                         <table class="min-w-full divide-y divide-gray-200 mt-4">
                             <thead class="bg-gray-50 dark:bg-gray-700">

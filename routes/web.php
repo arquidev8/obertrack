@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskController; // Asegúrate de importar TaskControlle
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\EmployerTaskController;
 use App\Http\Controllers\ManagerTaskController;
+use App\Http\Controllers\EmployeeTaskController;
 
 
 Route::get('/', function () {
@@ -98,6 +99,23 @@ Route::middleware(['auth'])->group(function () {
       Route::delete('/manager/tasks/{task}', [ManagerTaskController::class, 'destroy'])->name('manager.tasks.destroy');
 
 
+
+
+      Route::post('/manager/tasks/{task}/comment', [ManagerTaskController::class, 'addComment'])->name('manager.tasks.comment');
+      Route::put('/manager/comments/{comment}', [ManagerTaskController::class, 'updateComment'])->name('manager.tasks.comment.update');
+      Route::delete('/manager/comments/{comment}', [ManagerTaskController::class, 'deleteComment'])->name('manager.tasks.comment.delete');
+});
+
+
+
+//PARA TAREAS CREADAS POR LOS MANAGERS MANEJA LA VISTA DE ESA TAREA DESDE EL EMPLEADO COMUN
+Route::middleware(['auth'])->group(function () {
+    Route::get('/empleados/tareas', [EmployeeTaskController::class, 'index'])->name('empleados.tasks.index');
+    Route::get('/empleados/tareas/{task}', [EmployeeTaskController::class, 'show'])->name('empleados.tasks.show');
+    Route::post('/empleados/tareas/{task}/comment', [EmployeeTaskController::class, 'addComment'])->name('empleados.tasks.comment');
+    Route::put('/empleados/tareas/comment/{comment}', [EmployeeTaskController::class, 'updateComment'])->name('empleados.tasks.comment.update');
+    Route::delete('/empleados/tareas/comment/{comment}', [EmployeeTaskController::class, 'deleteComment'])->name('empleados.tasks.comment.delete');
+    Route::post('/empleados/tareas/{task}/toggle-completion', [EmployeeTaskController::class, 'toggleCompletion'])->name('empleados.tasks.toggle-completion');
 });
 
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use App\Models\WorkHours;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -37,10 +38,27 @@ class EmpleadoController extends Controller
 
 
 
+// public function create()
+// {
+//     $user = auth()->user(); // Obtener el usuario autenticado
+//     $empleador = User::find($user->empleador_id);
+//     // Obtener tareas creadas por el empleado
+//     $tareasCreadas = Task::where('created_by', $user->id)->get();
+
+//     $tareas = $tareasCreadas;
+
+//     // Obtener tareas asignadas al empleado
+//     $tareasAsignadas = Task::where('visible_para', $user->id)->with('visibleTo')->get();
+
+//     // Pasar ambas colecciones a la vista
+//     return view('empleados.crear_tarea', compact('tareas', 'tareasAsignadas', 'empleador'));
+// }
+
 public function create()
 {
     $user = auth()->user(); // Obtener el usuario autenticado
-
+    $empleador = User::find($user->empleador_id);
+    
     // Obtener tareas creadas por el empleado
     $tareasCreadas = Task::where('created_by', $user->id)->get();
 
@@ -49,8 +67,24 @@ public function create()
     // Obtener tareas asignadas al empleado
     $tareasAsignadas = Task::where('visible_para', $user->id)->with('visibleTo')->get();
 
-    // Pasar ambas colecciones a la vista
-    return view('empleados.crear_tarea', compact('tareas', 'tareasAsignadas'));
+    // Obtener tareas creadas por usuarios empleado que son managers y asignadas a un empleado
+    $tareasManageres = Task::whereHas('createdBy', function($query) use ($empleador) {
+        $query->where('empleador_id', $empleador->id)
+              ->where('is_manager', true)
+              ->where('tipo_usuario', 'empleado');
+    })
+    ->whereNotNull('visible_para')
+    ->with(['createdBy', 'visibleTo'])
+    ->get();
+
+    // Obtener tareas creadas por el empleador y asignadas específicamente al empleado actual
+    $tareasEmpleador = Task::where('created_by', $empleador->id)
+        ->where('visible_para', $user->id)
+        ->with(['createdBy', 'visibleTo', 'comments.user'])
+        ->get();
+
+    // Pasar todas las colecciones a la vista
+    return view('empleados.crear_tarea', compact('tareas', 'tareasAsignadas', 'tareasManageres', 'tareasEmpleador', 'empleador'));
 }
 
 

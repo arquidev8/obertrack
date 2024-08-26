@@ -97,6 +97,9 @@
                         </div>
                         
                         <div class="flex items-center justify-end mt-6">
+                            <a href="{{ route('manager.tasks.index') }}" class="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mr-2">
+                                Cancelar
+                            </a>
                             <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition ease-in-out duration-150">
                                 Crear Tarea
                             </button>
