@@ -123,7 +123,7 @@
 
 
 
-<div class="bg-gray-100 min-h-screen">
+<!-- <div class="bg-gray-100 min-h-screen">
     <div class="max-w-9xl mx-auto px-4 sm:px-6">
         <div class="bg-gray-100 min-h-screen py-8">
             <div class="container mx-auto px-4 sm:px-6">
@@ -238,7 +238,173 @@
             </div>
         </div>
     </div>
+</div> -->
+
+
+<div class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Asignaciones de <span class="text-blue-600">{{ $empleador ? $empleador->name : 'No asignado' }}</span>
+        </h1>
+
+        @if(session('success'))
+            <div class="bg-green-500 text-white p-2 rounded-md mb-4 text-center text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="border-b border-gray-200">
+                <!-- <button onclick="toggleFilters()" class="w-full px-4 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    <span class="flex items-center justify-between">
+                        <span>Filtros y Búsqueda</span>
+                        <svg id="filterIcon" class="h-5 w-5 transform transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                </button>
+                <div id="filterSection" class="hidden px-4 py-3 border-t border-gray-200">
+                    <form method="GET" action="{{ route('empleadores.tareas-asignadas') }}" class="space-y-3">
+                        <div class="flex space-x-3">
+                            <select name="status" class="flex-1 px-3 py-2 text-sm rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="all">Todas las tareas</option>
+                                <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Completadas</option>
+                                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pendientes</option>
+                            </select>
+                            <input type="text" name="search" placeholder="Buscar tarea..." value="{{ request('search') }}" class="flex-1 px-3 py-2 text-sm rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Aplicar Filtros
+                        </button>
+                    </form>
+                </div> -->
+            </div>
+
+            <div class="divide-y divide-gray-200">
+                @forelse($tareasEmpleador as $tarea)
+                    <div id="task-{{ $tarea->id }}" class="p-4 hover:bg-gray-50 transition duration-150 ease-in-out">
+                        <div class="flex items-center justify-between cursor-pointer" onclick="toggleTaskDetails({{ $tarea->id }})">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-block h-2 w-2 rounded-full {{ $tarea->completed ? 'bg-green-400' : 'bg-yellow-400' }}"></span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {{ $tarea->title }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {{ $tarea->start_date->format('d/m/Y') }} - {{ $tarea->end_date->format('d/m/Y') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span id="status-badge-{{ $tarea->id }}" class="px-2 py-1 text-xs font-medium rounded-full {{ $tarea->completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                    {{ $tarea->completed ? 'Completada' : 'Pendiente' }}
+                                </span>
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="taskDetails-{{ $tarea->id }}" class="hidden mt-4 space-y-4">
+                            <div class="text-sm text-gray-700">
+                                <p>{{ $tarea->description }}</p>
+                                <p class="mt-2 text-xs text-gray-500">Asignado por: {{ $tarea->createdBy->name ?? 'N/A' }}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="toggleTaskCompletion({{ $tarea->id }})" 
+                                        id="toggle-button-{{ $tarea->id }}" 
+                                        class="flex-1 px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    {{ $tarea->completed ? 'Marcar como Pendiente' : 'Marcar como Completada' }}
+                                </button>
+                                <button onclick="toggleComments({{ $tarea->id }})" 
+                                        class="flex-1 px-3 py-1 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    <span id="commentButtonText-{{ $tarea->id }}">Comentarios</span>
+                                    <span id="commentCount-{{ $tarea->id }}" class="ml-1 bg-gray-500 text-white px-1.5 py-0.5 rounded-full text-xs">
+                                        {{ $tarea->comments->count() }}
+                                    </span>
+                                </button>
+                            </div>
+                            <div id="commentsSection-{{ $tarea->id }}" class="hidden space-y-3">
+                                <div id="commentsList-{{ $tarea->id }}" class="space-y-2 max-h-40 overflow-y-auto">
+                                    @foreach ($tarea->comments as $comment)
+                                        <div id="comment-{{ $comment->id }}" class="bg-gray-50 p-2 rounded-md text-sm">
+                                            <div class="flex items-start justify-between">
+                                                <div class="space-y-1">
+                                                    <p>
+                                                        <span class="font-medium text-gray-900">{{ $comment->user->name }}:</span>
+                                                        <span id="commentContent-{{ $comment->id }}" class="text-gray-700">{{ $comment->content }}</span>
+                                                    </p>
+                                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                                </div>
+                                                @if($comment->user_id == auth()->id())
+                                                    <div class="flex space-x-1">
+                                                        <button onclick="editComment({{ $comment->id }})" class="text-blue-600 hover:text-blue-800">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                            </svg>
+                                                        </button>
+                                                        <button onclick="deleteComment({{ $comment->id }}, {{ $tarea->id }})" class="text-red-600 hover:text-red-800">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <form onsubmit="addTaskComment(event, {{ $tarea->id }})" class="mt-2">
+                                    @csrf
+                                    <textarea id="newComment-{{ $tarea->id }}" rows="2" class="w-full px-3 py-2 text-sm border rounded-md resize-none focus:ring-blue-500 focus:border-blue-500" placeholder="Añadir un comentario..."></textarea>
+                                    <button type="submit" class="mt-2 w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Comentar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="p-4 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No hay tareas asignadas</h3>
+                        <p class="mt-1 text-sm text-gray-500">Cuando se te asignen tareas, aparecerán aquí.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+function toggleFilters() {
+    const filterSection = document.getElementById('filterSection');
+    const filterIcon = document.getElementById('filterIcon');
+    filterSection.classList.toggle('hidden');
+    filterIcon.classList.toggle('rotate-180');
+}
+
+function toggleTaskDetails(taskId) {
+    const detailsElement = document.getElementById(`taskDetails-${taskId}`);
+    detailsElement.classList.toggle('hidden');
+}
+
+function toggleComments(taskId) {
+    const commentsSection = document.getElementById(`commentsSection-${taskId}`);
+    const buttonText = document.getElementById(`commentButtonText-${taskId}`);
+    commentsSection.classList.toggle('hidden');
+    buttonText.textContent = commentsSection.classList.contains('hidden') ? 'Comentarios' : 'Ocultar';
+}
+
+// Existing functions (toggleTaskCompletion, addTaskComment, editComment, deleteComment) remain unchanged
+</script>
+
+
+
 
 <script>
     function toggleTaskCompletion(taskId) {
@@ -639,7 +805,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-<div>
+<!-- <div>
     <h1 class="text-4xl font-extrabold text-gray-900 mb-8 text-center mt-10">
         <span class="bg-clip-text text-transparent bg-blue-500">
             Actividades que he creado
@@ -789,9 +955,183 @@ document.addEventListener('DOMContentLoaded', function() {
             <p class="mt-1 text-sm text-gray-500">Puedes comenzar reportando una nueva actividad usando el formulario de creación.</p>
         </div>
     @endif
+</div> -->
+
+<div class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Actividades que he creado
+        </h1>
+
+        @if(session('success'))
+            <div class="bg-green-500 text-white p-2 rounded-md mb-4 text-center text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="divide-y divide-gray-200">
+                @forelse($tareas->where('created_by', auth()->id()) as $tarea)
+                    <div id="task-{{ $tarea->id }}" class="p-4 hover:bg-gray-50 transition duration-150 ease-in-out">
+                        <div class="flex items-center justify-between cursor-pointer" onclick="toggleTaskDetails({{ $tarea->id }})">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-block h-2 w-2 rounded-full {{ $tarea->completed ? 'bg-green-400' : 'bg-yellow-400' }}"></span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {{ $tarea->title }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {{ $tarea->start_date->format('d/m/Y') }} - {{ $tarea->end_date->format('d/m/Y') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full {{ $tarea->priority == 'high' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }}">
+                                    {{ ucfirst($tarea->priority) }}
+                                </span>
+                                <span id="status-badge-{{ $tarea->id }}" class="px-2 py-1 text-xs font-medium rounded-full {{ $tarea->completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                                    {{ $tarea->completed ? 'Completada' : 'Pendiente' }}
+                                </span>
+                                <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div id="taskDetails-{{ $tarea->id }}" class="hidden mt-4 space-y-4">
+                            <div class="text-sm text-gray-700">
+                                <p><strong>Descripción:</strong> {{ $tarea->description }}</p>
+                                <p class="mt-2"><strong>Asignado a:</strong> {{ $tarea->visibleTo->name ?? 'No asignado' }}</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="toggleTaskCompletion({{ $tarea->id }})" 
+                                        id="toggle-button-{{ $tarea->id }}" 
+                                        class="flex-1 px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    {{ $tarea->completed ? 'Marcar como Pendiente' : 'Marcar como Completada' }}
+                                </button>
+                                <button onclick="showEditFields({{ $tarea->id }})" 
+                                        class="flex-1 px-3 py-1 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    Editar
+                                </button>
+                                <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de querer eliminar esta tarea?');" class="inline-block flex-1">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full px-3 py-1 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="mt-4">
+                                <button onclick="toggleComments({{ $tarea->id }})" 
+                                        class="w-full px-3 py-1 bg-gray-200 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    <span id="commentButtonText-{{ $tarea->id }}">Comentarios</span>
+                                    <span id="commentCount-{{ $tarea->id }}" class="ml-1 bg-gray-500 text-white px-1.5 py-0.5 rounded-full text-xs">
+                                        {{ $tarea->comments->count() }}
+                                    </span>
+                                </button>
+                            </div>
+                            <div id="commentsSection-{{ $tarea->id }}" class="hidden space-y-3">
+                                <div id="commentsList-{{ $tarea->id }}" class="space-y-2 max-h-40 overflow-y-auto">
+                                    @foreach ($tarea->comments as $comment)
+                                        <div id="comment-{{ $comment->id }}" class="bg-gray-50 p-2 rounded-md text-sm">
+                                            <div class="flex items-start justify-between">
+                                                <div class="space-y-1">
+                                                    <p>
+                                                        <span class="font-medium text-gray-900">{{ $comment->user->name }}:</span>
+                                                        <span id="commentContent-{{ $comment->id }}" class="text-gray-700">{{ $comment->content }}</span>
+                                                    </p>
+                                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
+                                                </div>
+                                                @if($comment->user_id == auth()->id())
+                                                    <div class="flex space-x-1">
+                                                        <button onclick="editComment({{ $comment->id }})" class="text-blue-600 hover:text-blue-800">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                            </svg>
+                                                        </button>
+                                                        <button onclick="deleteComment({{ $comment->id }}, {{ $tarea->id }})" class="text-red-600 hover:text-red-800">
+                                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <form onsubmit="addTaskComment(event, {{ $tarea->id }})" class="mt-2">
+                                    @csrf
+                                    <textarea id="newComment-{{ $tarea->id }}" rows="2" class="w-full px-3 py-2 text-sm border rounded-md resize-none focus:ring-blue-500 focus:border-blue-500" placeholder="Añadir un comentario..."></textarea>
+                                    <button type="submit" class="mt-2 w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Comentar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="editForm{{ $tarea->id }}" style="display:none;" action="{{ route('tareas.update', $tarea->id) }}" method="POST" class="p-4 bg-gray-100">
+                        @csrf
+                        @method('PUT')
+                        <div class="space-y-4">
+                            <div>
+                                <label for="title{{ $tarea->id }}" class="block text-sm font-medium text-gray-700">Título</label>
+                                <input type="text" id="title{{ $tarea->id }}" name="title" value="{{ $tarea->title }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            </div>
+                            <div>
+                                <label for="description{{ $tarea->id }}" class="block text-sm font-medium text-gray-700">Descripción</label>
+                                <textarea id="description{{ $tarea->id }}" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">{{ $tarea->description }}</textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="start_date{{ $tarea->id }}" class="block text-sm font-medium text-gray-700">Fecha de inicio</label>
+                                    <input type="date" id="start_date{{ $tarea->id }}" name="start_date" value="{{ $tarea->start_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </div>
+                                <div>
+                                    <label for="end_date{{ $tarea->id }}" class="block text-sm font-medium text-gray-700">Fecha de fin</label>
+                                    <input type="date" id="end_date{{ $tarea->id }}" name="end_date" value="{{ $tarea->end_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="priority{{ $tarea->id }}" class="block text-sm font-medium text-gray-700">Prioridad</label>
+                                <select id="priority{{ $tarea->id }}" name="priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                    <option value="low" {{ $tarea->priority == 'low' ? 'selected' : '' }}>Baja</option>
+                                    <option value="medium" {{ $tarea->priority == 'medium' ? 'selected' : '' }}>Media</option>
+                                    <option value="high" {{ $tarea->priority == 'high' ? 'selected' : '' }}>Alta</option>
+                                    <option value="urgent" {{ $tarea->priority == 'urgent' ? 'selected' : '' }}>Urgente</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                @empty
+                    <div class="p-4 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No has creado actividades aún</h3>
+                        <p class="mt-1 text-sm text-gray-500">Cuando crees actividades, aparecerán aquí.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 </div>
 
+
+
 <script>
+
+function toggleTaskDetails(taskId) {
+    const detailsElement = document.getElementById(`taskDetails-${taskId}`);
+    detailsElement.classList.toggle('hidden');
+}
+
+
     function toggleComments(taskId) {
         const commentsSection = document.getElementById(`commentsSection-${taskId}`);
         const buttonText = document.getElementById(`commentButtonText-${taskId}`);

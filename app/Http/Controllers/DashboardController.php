@@ -26,8 +26,6 @@ class DashboardController extends Controller
     }
 
    
-
-
     public function crearTareaParaEmpleado(Request $request)
     {
         $request->validate([

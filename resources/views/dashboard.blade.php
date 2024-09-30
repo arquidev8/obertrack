@@ -90,7 +90,7 @@
                         </div>
                         @if(auth()->user()->is_manager)
                             <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="150">
-                                <div class="p-8 bg-purple-600">
+                                <div class="p-8 bg-black">
                                     <h2 class="text-3xl font-bold text-white mb-4">Tareas Asignadas a mi equipo</h2>
                                     <p class="text-gray-100 text-lg mb-6">Gestiona las tareas que has asignado a tus profesionales.</p>
                                     <a href="{{ route('manager.tasks.index') }}" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver Tareas Asignadas</a>
@@ -100,7 +100,7 @@
 
                         @if(auth()->user()->tipo_usuario == 'empleado')
                             <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200 mb-8 card-hover" data-aos="fade-up" data-aos-delay="150">
-                                <div class="p-8 bg-purple-600">
+                                <div class="p-8 bg-black">
                                     <h2 class="text-3xl font-bold text-white mb-4">Tareas asignadas por tu manager</h2>
                                     <p class="text-gray-100 text-lg mb-6">Gestiona las tareas que tu manager te ha asignado</p>
                                     <a href="{{ route('empleados.tasks.index') }}" class="inline-block bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-100 transition duration-150 ease-in-out">Ver Tareas Asignadas</a>
