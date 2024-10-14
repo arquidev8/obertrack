@@ -26,6 +26,8 @@ class DashboardController extends Controller
     }
 
    
+
+
     public function crearTareaParaEmpleado(Request $request)
     {
         $request->validate([
@@ -214,25 +216,237 @@ class DashboardController extends Controller
 // }
 
 
+
+//ULTIMO FUNCIONAL
+
+// public function verTareasEmpleados(Request $request)
+// {
+//     $user = auth()->user();
+
+//     // Verificar si el usuario es un empleador
+//     // if ($user->tipo_usuario !== 'empleador' ) {
+//     //     abort(403, 'No autorizado');
+//     // }
+
+//     if ($user->tipo_usuario !== 'empleador' && !$user->is_manager) {
+//     abort(403, 'No autorizado');
+// }
+
+//     // Obtener los empleados asignados a este empleador
+//     $empleados = User::where('empleador_id', $user->id)->get();
+
+//     // Obtener las tareas creadas por los empleados
+//     $tareas = Task::whereIn('created_by', $empleados->pluck('id'))->with('comments', 'createdBy');
+
+//     // Obtener las tareas creadas por el empleador para los empleados
+//     $tareasEmpleador = Task::where('created_by', $user->id)
+//                            ->whereIn('visible_para', $empleados->pluck('id'))
+//                            ->with('comments', 'visibleTo');
+
+//     // Filtrado por estado
+//     if ($request->has('status') && $request->status !== 'all') {
+//         $tareas = $tareas->where('completed', $request->status === 'completed' ? 1 : 0);
+//         $tareasEmpleador = $tareasEmpleador->where('completed', $request->status === 'completed' ? 1 : 0);
+//     }
+
+//     // Búsqueda por título
+//     if ($request->has('search') && $request->search) {
+//         $tareas = $tareas->where('title', 'like', '%' . $request->search . '%');
+//         $tareasEmpleador = $tareasEmpleador->where('title', 'like', '%' . $request->search . '%');
+//     }
+
+//     $tareas = $tareas->get();
+//     $tareasEmpleador = $tareasEmpleador->get();
+
+//     // Preparar datos para el gráfico
+//     $chartData = $this->prepareChartData($tareas);
+
+//     // Obtener las horas trabajadas de los empleados por semana
+//     $weekStart = $request->week ? Carbon::parse($request->week) : Carbon::now()->startOfWeek(Carbon::MONDAY);
+//     $weekEnd = $weekStart->copy()->endOfWeek(Carbon::FRIDAY);
+//     $workHoursSummary = $this->getWorkHoursSummary($empleados, $weekStart, $weekEnd);
+
+//     // Obtener las semanas pendientes
+//     $pendingWeeks = $this->getPendingWeeks($empleados);
+
+//     $currentMonth = Carbon::now()->startOfMonth();
+
+//     // Calcular el total de horas aprobadas para el mes actual
+//     $totalApprovedHours = WorkHours::whereIn('user_id', $empleados->pluck('id'))
+//         ->whereYear('work_date', $currentMonth->year)
+//         ->whereMonth('work_date', $currentMonth->month)
+//         ->where('approved', true)
+//         ->sum('hours_worked');
+
+//     $empleadosInfo = $empleados->map(function ($empleado) use ($currentMonth) {
+//         $startOfMonth = $currentMonth->copy()->startOfMonth();
+//         $endOfMonth = $currentMonth->copy()->endOfMonth();
+
+//         $totalApprovedHours = WorkHours::where('user_id', $empleado->id)
+//             ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
+//             ->where('approved', true)
+//             ->sum('hours_worked');
+
+//         $approvedWeeks = $this->getApprovedWeeks(collect([$empleado]), $currentMonth);
+
+//         return [
+//             'id' => $empleado->id,
+//             'name' => $empleado->name,
+//             'totalApprovedHours' => $totalApprovedHours,
+//             'approvedWeeks' => $approvedWeeks
+//         ];
+//     });
+
+//     return view('empleadores.ver_tareas_empleados', compact(
+//         'tareas',
+//         'tareasEmpleador',
+//         'chartData',
+//         'workHoursSummary',
+//         'weekStart',
+//         'currentMonth',
+//         'totalApprovedHours',
+//         'pendingWeeks',
+//         'empleadosInfo',
+//         'empleados'
+//     ));
+// }
+
+
+
+//NUEVO CONTROLADOR QUE INCLUYE AL MANAGER EN LA VISTA DEL EMPLEADOR
+// public function verTareasEmpleados(Request $request)
+// {
+//     $user = auth()->user();
+
+//     // Verificar si el usuario es un empleador o un manager
+//     if ($user->tipo_usuario !== 'empleador' && !$user->is_manager) {
+//         abort(403, 'No autorizado');
+//     }
+
+//     // Obtener los empleados
+//     if ($user->tipo_usuario === 'empleador') {
+//         $empleados = User::where('empleador_id', $user->id)->get();
+//     } else {
+//         // Para managers, obtener todos los empleados del mismo empleador
+//         $empleados = User::where('empleador_id', $user->empleador_id)->get();
+//     }
+
+//     // Obtener las tareas creadas por los empleados
+//     $tareas = Task::whereIn('created_by', $empleados->pluck('id'))->with('comments', 'createdBy');
+
+//     // Obtener las tareas creadas para los empleados (por el empleador o el manager)
+//     $tareasEmpleador = Task::where(function ($query) use ($user, $empleados) {
+//         $query->where('created_by', $user->id)
+//               ->orWhere('created_by', $user->empleador_id);
+//     })->whereIn('visible_para', $empleados->pluck('id'))
+//       ->with('comments', 'visibleTo');
+
+//     // Filtrado por estado
+//     if ($request->has('status') && $request->status !== 'all') {
+//         $tareas = $tareas->where('completed', $request->status === 'completed' ? 1 : 0);
+//         $tareasEmpleador = $tareasEmpleador->where('completed', $request->status === 'completed' ? 1 : 0);
+//     }
+
+//     // Búsqueda por título
+//     if ($request->has('search') && $request->search) {
+//         $tareas = $tareas->where('title', 'like', '%' . $request->search . '%');
+//         $tareasEmpleador = $tareasEmpleador->where('title', 'like', '%' . $request->search . '%');
+//     }
+
+//     $tareas = $tareas->get();
+//     $tareasEmpleador = $tareasEmpleador->get();
+
+//     // Preparar datos para el gráfico
+//     $chartData = $this->prepareChartData($tareas->concat($tareasEmpleador));
+
+//     // Obtener las horas trabajadas de los empleados por semana
+//     $weekStart = $request->week ? Carbon::parse($request->week) : Carbon::now()->startOfWeek(Carbon::MONDAY);
+//     $weekEnd = $weekStart->copy()->endOfWeek(Carbon::FRIDAY);
+//     $workHoursSummary = $this->getWorkHoursSummary($empleados, $weekStart, $weekEnd);
+
+//     // Obtener las semanas pendientes
+//     $pendingWeeks = $this->getPendingWeeks($empleados);
+
+//     $currentMonth = Carbon::now()->startOfMonth();
+
+//     // Calcular el total de horas aprobadas para el mes actual
+//     $totalApprovedHours = WorkHours::whereIn('user_id', $empleados->pluck('id'))
+//         ->whereYear('work_date', $currentMonth->year)
+//         ->whereMonth('work_date', $currentMonth->month)
+//         ->where('approved', true)
+//         ->sum('hours_worked');
+
+//     $empleadosInfo = $empleados->map(function ($empleado) use ($currentMonth) {
+//         $startOfMonth = $currentMonth->copy()->startOfMonth();
+//         $endOfMonth = $currentMonth->copy()->endOfMonth();
+
+//         $totalApprovedHours = WorkHours::where('user_id', $empleado->id)
+//             ->whereBetween('work_date', [$startOfMonth, $endOfMonth])
+//             ->where('approved', true)
+//             ->sum('hours_worked');
+
+//         $approvedWeeks = $this->getApprovedWeeks(collect([$empleado]), $currentMonth);
+
+//         return [
+//             'id' => $empleado->id,
+//             'name' => $empleado->name,
+//             'totalApprovedHours' => $totalApprovedHours,
+//             'approvedWeeks' => $approvedWeeks
+//         ];
+//     });
+
+//     return view('empleadores.ver_tareas_empleados', compact(
+//         'tareas',
+//         'tareasEmpleador',
+//         'chartData',
+//         'workHoursSummary',
+//         'weekStart',
+//         'currentMonth',
+//         'totalApprovedHours',
+//         'pendingWeeks',
+//         'empleadosInfo',
+//         'empleados'
+//     ));
+// }
+
+
 public function verTareasEmpleados(Request $request)
 {
     $user = auth()->user();
 
-    // Verificar si el usuario es un empleador
-    if ($user->tipo_usuario !== 'empleador') {
+    // Verificar si el usuario es un empleador, un manager o un superadmin
+    // if (!$user->tipo_usuario === 'empleador' && !$user->is_manager && !$user->is_superadmin) {
+    //     abort(403, 'No autorizado');
+    // }
+
+    if ($user->tipo_usuario !== 'empleador' && (!$user->is_manager || !$user->is_superadmin)) {
         abort(403, 'No autorizado');
     }
 
-    // Obtener los empleados asignados a este empleador
-    $empleados = User::where('empleador_id', $user->id)->get();
+
+    // Obtener los empleados
+    if ($user->tipo_usuario === 'empleador' || $user->is_superadmin) {
+        $empleados = User::where('empleador_id', $user->id)->get();
+    } else {
+        // Para managers, obtener todos los empleados del mismo empleador
+        $empleados = User::where('empleador_id', $user->empleador_id)->get();
+    }
+
+    // Si es superadmin, obtener todos los empleados
+    if ($user->is_superadmin) {
+        $empleados = User::where('tipo_usuario', 'empleado')->get();
+    }
 
     // Obtener las tareas creadas por los empleados
     $tareas = Task::whereIn('created_by', $empleados->pluck('id'))->with('comments', 'createdBy');
 
-    // Obtener las tareas creadas por el empleador para los empleados
-    $tareasEmpleador = Task::where('created_by', $user->id)
-                           ->whereIn('visible_para', $empleados->pluck('id'))
-                           ->with('comments', 'visibleTo');
+    // Obtener las tareas creadas para los empleados (por el empleador, manager o superadmin)
+    $tareasEmpleador = Task::where(function ($query) use ($user, $empleados) {
+        $query->where('created_by', $user->id)
+              ->orWhere('created_by', $user->empleador_id)
+              ->orWhereIn('created_by', User::where('is_superadmin', true)->pluck('id'));
+    })->whereIn('visible_para', $empleados->pluck('id'))
+      ->with('comments', 'visibleTo');
 
     // Filtrado por estado
     if ($request->has('status') && $request->status !== 'all') {
@@ -250,7 +464,7 @@ public function verTareasEmpleados(Request $request)
     $tareasEmpleador = $tareasEmpleador->get();
 
     // Preparar datos para el gráfico
-    $chartData = $this->prepareChartData($tareas);
+    $chartData = $this->prepareChartData($tareas->concat($tareasEmpleador));
 
     // Obtener las horas trabajadas de los empleados por semana
     $weekStart = $request->week ? Carbon::parse($request->week) : Carbon::now()->startOfWeek(Carbon::MONDAY);
@@ -301,8 +515,6 @@ public function verTareasEmpleados(Request $request)
         'empleados'
     ));
 }
-
-
 
 
 private function getPendingWeeks($empleados)

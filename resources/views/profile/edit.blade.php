@@ -1,5 +1,3 @@
-
-
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
@@ -46,16 +44,27 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @if($empleado->is_manager)
-                                                <form action="{{ route('profile.degradar-manager', $empleado) }}" method="POST">
+                                                <form action="{{ route('profile.degradar-manager', $empleado) }}" method="POST" class="mb-2">
                                                     @csrf
                                                     @method('PUT')
                                                     <button type="submit" class="text-red-600 hover:text-red-900">Degradar de Manager</button>
                                                 </form>
                                             @else
-                                                <form action="{{ route('profile.promover-manager', $empleado) }}" method="POST">
+                                                <form action="{{ route('profile.promover-manager', $empleado) }}" method="POST" class="mb-2">
                                                     @csrf
                                                     @method('PUT')
                                                     <button type="submit" class="text-green-600 hover:text-green-900">Promover a Manager</button>
+                                                </form>
+                                            @endif
+
+                                            <!-- Formulario para promover o degradar a SuperAdmin -->
+                                            @if($empleado->is_manager)
+                                                <form action="{{ route('profile.toggle-superadmin', $empleado) }}" method="POST" class="mb-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <button type="submit" class="text-purple-600 hover:text-purple-900">
+                                                        {{ $empleado->is_superadmin ? 'Quitar SuperAdmin' : 'Hacer SuperAdmin' }}
+                                                    </button>
                                                 </form>
                                             @endif
                                         </td>

@@ -159,6 +159,9 @@ Route::middleware(['auth'])->group(function () {
 
 
 
+Route::middleware(['auth'])->group(function () {
+    Route::put('/profile/{user}/toggle-superadmin', [ProfileController::class, 'toggleSuperAdmin'])->name('profile.toggle-superadmin');
+});
 
 
 Route::middleware(['auth'])->group(function () {

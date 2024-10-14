@@ -26,7 +26,7 @@ class User extends Authenticatable
         'tipo_usuario',
         'empleador_id',
         'is_manager',
-        'signature',
+        'is_superadmin',
     ];
 
 
@@ -51,6 +51,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_manager' => 'boolean',
+            'is_superadmin' => 'boolean',
         ];
     }
 
@@ -79,7 +80,10 @@ class User extends Authenticatable
     //  }
 
 
-
+    public function isSuperAdmin()
+    {
+        return $this->is_superadmin;
+    }
 
 
     // Un empleador puede tener muchos empleados

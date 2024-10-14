@@ -23,6 +23,24 @@ class ProfileController extends Controller
     //     ]);
     // }
 
+
+    public function toggleSuperAdmin(User $user)
+{
+    // Verificar si el usuario es un manager
+    if (!$user->is_manager) {
+        return back()->with('error', 'Solo los managers pueden ser promovidos a SuperAdmin.');
+    }
+
+    // Cambiar el estado de is_superadmin
+    $user->is_superadmin = !$user->is_superadmin; // Alternar el valor
+    $user->save();
+
+    $action = $user->is_superadmin ? 'promovido a' : 'degradado de';
+    return back()->with('status', "El usuario ha sido {$action} SuperAdmin exitosamente.");
+}
+
+
+
     public function edit(Request $request): View
     {
         $user = $request->user();

@@ -42,6 +42,13 @@
                                         {{ __('Registro de Horas') }}
                                     </a>
                                 @endif
+                                @if(auth()->user()->is_manager && auth()->user()->is_superadmin)
+                                    <a href="{{ route('empleadores.tareas-asignadas') }}" 
+                                       class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
+                                        <span class="material-icons-outlined mr-3 text-blue-400">assessment</span>
+                                        {{ __('Reportes') }}
+                                    </a>
+                                @endif
                                 <a href="/profile" class="flex items-center text-gray-700 hover:bg-indigo-50 p-3 rounded-md transition duration-150 ease-in-out">
                                     <span class="material-icons-outlined mr-3 text-blue-400">person</span>
                                     Perfil
