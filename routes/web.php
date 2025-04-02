@@ -208,6 +208,8 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/profile/{user}/promover-manager', [ProfileController::class, 'promoverAManager'])->name('profile.promover-manager');
     Route::put('/profile/{user}/degradar-manager', [ProfileController::class, 'degradarDeManager'])->name('profile.degradar-manager');
+
+    Route::delete('/profile/eliminar-empleado/{empleado}', [ProfileController::class, 'eliminarEmpleado'])->name('profile.eliminar-empleado');
 });
 
 require __DIR__.'/auth.php';

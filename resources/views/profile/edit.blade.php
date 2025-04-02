@@ -32,6 +32,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Eliminar</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800">
@@ -57,7 +58,6 @@
                                                 </form>
                                             @endif
 
-                                            <!-- Formulario para promover o degradar a SuperAdmin -->
                                             @if($empleado->is_manager)
                                                 <form action="{{ route('profile.toggle-superadmin', $empleado) }}" method="POST" class="mb-2">
                                                     @csrf
@@ -67,6 +67,13 @@
                                                     </button>
                                                 </form>
                                             @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <form action="{{ route('profile.eliminar-empleado', $empleado) }}" method="POST" onsubmit="return confirm('¿Estás seguro de que quieres eliminar a este empleado?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach

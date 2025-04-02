@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Models\User;  
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 
 class ProfileController extends Controller
@@ -112,4 +115,66 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+
+    public function eliminarEmpleado(User $empleado)
+    {
+        try {
+            DB::beginTransaction();
+    
+            Log::info("Intentando eliminar empleado ID: " . $empleado->id);
+    
+            // 1. Manejar empleados asociados
+            $empleadosAsociados = $empleado->empleados;
+            foreach ($empleadosAsociados as $empleadoAsociado) {
+                $empleadoAsociado->empleador_id = null;
+                $empleadoAsociado->save();
+            }
+            Log::info("Empleados desasociados: " . $empleadosAsociados->count());
+    
+            // 2. Manejar tareas creadas
+            $tareasCreadas = $empleado->createdTasks;
+            foreach ($tareasCreadas as $tarea) {
+                // Puedes elegir eliminar las tareas o reasignarlas a otro usuario
+                $tarea->delete(); // O $tarea->created_by = $otroUsuarioId; $tarea->save();
+            }
+            Log::info("Tareas creadas manejadas: " . $tareasCreadas->count());
+    
+            // 3. Manejar tareas asignadas
+            $tareasAsignadas = $empleado->assignedTasks;
+            foreach ($tareasAsignadas as $tarea) {
+                // Puedes elegir eliminar las tareas o reasignarlas a otro usuario
+                $tarea->visible_para = null; // O $tarea->visible_para = $otroUsuarioId;
+                $tarea->save();
+            }
+            Log::info("Tareas asignadas manejadas: " . $tareasAsignadas->count());
+    
+            // 4. Manejar horas de trabajo
+            $empleado->workHours()->delete();
+            Log::info("Horas de trabajo eliminadas");
+    
+            // 5. Eliminar firma del usuario
+            if ($empleado->signature) {
+                $empleado->signature->delete();
+                Log::info("Firma del usuario eliminada");
+            }
+    
+            // 6. Finalmente, eliminar al usuario
+            $userDeleted = $empleado->delete();
+            Log::info("Usuario eliminado: " . ($userDeleted ? 'Sí' : 'No'));
+    
+            if (!$userDeleted) {
+                throw new \Exception("No se pudo eliminar al empleado por razones desconocidas.");
+            }
+    
+            DB::commit();
+            return redirect()->back()->with('status', 'Empleado y sus datos asociados eliminados con éxito.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error al eliminar empleado: " . $e->getMessage());
+            return redirect()->back()->with('error', 'No se pudo eliminar al empleado. Error: ' . $e->getMessage());
+        }
+    }
+
+
 }

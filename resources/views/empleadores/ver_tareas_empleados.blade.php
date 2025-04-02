@@ -3,7 +3,7 @@
 <x-app-layout>
  <div class="bg-white dark:bg-white min-h-screen p-12">
     <main class="max-w-7xl mx-auto">
-        
+<!--         
         <div class="text-center mb-12">
             {{-- <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-8 mt-20">Panel de Tareas</h1> --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -27,7 +27,7 @@
                 @endforeach
             </div>
         </div>
-
+ -->
 
 
 
@@ -153,142 +153,180 @@
     </div>
 </div> -->
 
-<div class="py-12 bg-gray-100 dark:bg-gray-900 p-6 sm:p-10">
+<div x-data="{ activeTab: 'pending' }" class="py-12 bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 md:p-8 lg:p-10">
     <div class="max-w-7xl mx-auto">
-        <!-- Pending Weeks Section -->
-        @if(!empty($pendingWeeks))
-            <section class="mb-12">
-                <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">Semanas Pendientes de Aprobación</h2>
-                
-                <!-- Quick Summary -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
-                    <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                        Total de semanas pendientes: {{ count($pendingWeeks) }}
-                    </p>
-                </div>
+        <!-- Tabs -->
+        <div class="mb-8">
+            <div class="sm:hidden">
+                <select x-model="activeTab" class="block w-full rounded-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="pending">Semanas Pendientes</option>
+                    <option value="current">Semana Actual</option>
+                </select>
+            </div>
+            <div class="hidden sm:block">
+                <nav class="flex space-x-4" aria-label="Tabs">
+                    <button @click="activeTab = 'pending'" :class="{'bg-indigo-100 text-indigo-700': activeTab === 'pending', 'text-gray-500 hover:text-gray-700': activeTab !== 'pending'}" class="px-3 py-2 font-medium text-sm rounded-md">
+                        Semanas Pendientes
+                    </button>
+                    <button @click="activeTab = 'current'" :class="{'bg-indigo-100 text-indigo-700': activeTab === 'current', 'text-gray-500 hover:text-gray-700': activeTab !== 'current'}" class="px-3 py-2 font-medium text-sm rounded-md">
+                        Semana Actual
+                    </button>
+                </nav>
+            </div>
+        </div>
 
-                <!-- Accordion for Pending Weeks -->
-                <div class="space-y-4">
-                    @foreach($pendingWeeks as $index => $pendingWeek)
-                        <div x-data="{ open: false }" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                            <button @click="open = !open" class="w-full px-6 py-4 text-left focus:outline-none">
+        <!-- Pending Weeks Section -->
+        <section x-show="activeTab === 'pending'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">Semanas Pendientes de Aprobación</h2>
+
+            <!-- Quick Summary -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+                <p class="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                    <i class="fas fa-clock mr-2"></i> Total de semanas pendientes: {{ count($pendingWeeks) }}
+                </p>
+            </div>
+
+            <!-- List of Pending Weeks -->
+            <div class="space-y-4">
+                @foreach($pendingWeeks as $index => $pendingWeek)
+                    <div x-data="{ open: false }" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-gradient-to-r from-green-500 to-blue-500 p-4">
+                            <button @click="open = !open" class="w-full text-left focus:outline-none">
                                 <div class="flex items-center justify-between">
-                                    <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                                        Semana del {{ $pendingWeek['start']->format('d/m/Y') }} al {{ $pendingWeek['end']->format('d/m/Y') }}
+                                    <h3 class="text-xl font-semibold text-white">
+                                        <i class="far fa-calendar-alt mr-2"></i> Semana del {{ $pendingWeek['start']->format('d/m/Y') }} al {{ $pendingWeek['end']->format('d/m/Y') }}
                                     </h3>
-                                    <svg class="w-5 h-5 text-gray-500" :class="{'transform rotate-180': open}" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="w-5 h-5 text-white" :class="{'transform rotate-180': open}" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
                                         <path d="M19 9l-7 7-7-7"></path>
                                     </svg>
                                 </div>
                             </button>
-                            <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="px-6 pb-4">
-                                @foreach($pendingWeek['summary'] as $employeeId => $summary)
-                                    <div x-data="{ employeeOpen: false }" class="mb-4 last:mb-0 border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0 last:pb-0">
-                                        <button @click="employeeOpen = !employeeOpen" class="w-full flex items-center justify-between focus:outline-none">
-                                            <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200">{{ $summary['name'] }}</h4>
-                                            <div class="flex space-x-2">
-                                                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">{{ $summary['total_hours'] }}/40 horas</span>
-                                                @if($summary['pending_hours'] > 0)
-                                                    <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">{{ $summary['pending_hours'] }} pendientes</span>
-                                                @else
-                                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Aprobadas</span>
-                                                @endif
-                                            </div>
-                                        </button>
-                                        <div x-show="employeeOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="mt-4">
-                                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                                                <div class="grid grid-cols-5 gap-2">
-                                                    @foreach($summary['days'] as $day)
-                                                        <div class="text-center">
-                                                            <div class="text-sm font-bold text-gray-600 dark:text-gray-300">{{ Carbon\Carbon::parse($day['date'])->format('D') }}</div>
-                                                            <div class="text-lg font-semibold {{ $day['approved'] ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400' }}">
-                                                                {{ $day['hours'] }}
-                                                            </div>
-                                                            <div class="text-xs {{ $day['approved'] ? 'text-green-500' : 'text-yellow-500' }}">
-                                                                {{ $day['approved'] ? 'Aprobado' : 'Pendiente' }}
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </div>
+                        </div>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="p-4 sm:p-6">
+                            @foreach($pendingWeek['summary'] as $employeeId => $summary)
+                                <div class="mb-6 last:mb-0 border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
+                                    <div class="flex flex-wrap items-center justify-between mb-4">
+                                        <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 sm:mb-0">
+                                            <i class="fas fa-user-circle mr-2"></i> {{ $summary['name'] }}
+                                        </h4>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
+                                                <i class="fas fa-clock mr-1"></i> {{ $summary['total_hours'] }}/40h semanales
+                                            </span>
                                             @if($summary['pending_hours'] > 0)
-                                                <div class="flex justify-end space-x-2">
-                                                    <form action="{{ route('work-hours.approve-week') }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="week_start" value="{{ $pendingWeek['start']->format('Y-m-d') }}">
-                                                        <input type="hidden" name="employee_id" value="{{ $employeeId }}">
-                                                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
-                                                            Aprobar
-                                                        </button>
-                                                    </form>
-                                                    <button onclick="showCommentModal({{ $employeeId }}, '{{ $pendingWeek['start']->format('Y-m-d') }}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
-                                                        Aprobar con comentarios
-                                                    </button>
-                                                </div>
+                                                <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-semibold">
+                                                    <i class="fas fa-hourglass-half mr-1"></i> {{ $summary['pending_hours'] }}h pendientes por aprobar
+                                                </span>
+                                            @else
+                                                <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-semibold">
+                                                    <i class="fas fa-check mr-1"></i> Aprobadas
+                                                </span>
                                             @endif
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        <!-- Current Week Summary Section -->
-        <section>
-            <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">Resumen Semana Actual</h2>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                <div class="bg-green-600 dark:bg-green-800 p-4">
-                    <h3 class="text-xl font-semibold text-white">{{ $weekStart->format('d/m/Y') }} al {{ $weekStart->copy()->endOfWeek(Carbon\Carbon::FRIDAY)->format('d/m/Y') }}</h3>
-                </div>
-                <div class="p-6">
-                    @foreach ($workHoursSummary as $employeeId => $summary)
-                        <div x-data="{ open: false }" class="mb-6 last:mb-0 border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
-                            <button @click="open = !open" class="w-full flex flex-wrap items-center justify-between mb-4 focus:outline-none">
-                                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200">{{ $summary['name'] }}</h4>
-                                <div class="flex space-x-2 mt-2 sm:mt-0">
-                                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">{{ $summary['total_hours'] }}/40 horas</span>
+                                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-1 sm:gap-2">
+                                            @foreach($summary['days'] as $day)
+                                                <div class="flex-1 flex flex-col items-center">
+                                                    <div class="text-sm font-bold text-gray-600 dark:text-gray-300">{{ Carbon\Carbon::parse($day['date'])->format('D') }}</div>
+                                                    <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-t-lg overflow-hidden" style="height: {{ ($day['hours'] / 8) * 100 }}%">
+                                                        <div class="h-full {{ $day['approved'] ? 'bg-green-500' : 'bg-yellow-500' }} flex items-center justify-center text-white font-bold">
+                                                            {{ $day['hours'] }}h
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-xs {{ $day['approved'] ? 'text-green-500' : 'text-yellow-500' }} mt-1">
+                                                        {{ $day['approved'] ? 'Aprobado' : 'Pendiente' }}
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                     @if($summary['pending_hours'] > 0)
-                                        <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">{{ $summary['pending_hours'] }} pendientes</span>
-                                    @else
-                                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Aprobadas</span>
+                                        <div class="flex flex-wrap justify-end gap-2">
+                                            <form action="{{ route('work-hours.approve-week') }}" method="POST" onsubmit="saveScrollPosition(this)">
+                                                @csrf
+                                                <input type="hidden" name="week_start" value="{{ $pendingWeek['start']->format('Y-m-d') }}">
+                                                <input type="hidden" name="employee_id" value="{{ $employeeId }}">
+                                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
+                                                    <i class="fas fa-check mr-1"></i> Aprobar
+                                                </button>
+                                            </form>
+                                            <button onclick="showCommentModal({{ $employeeId }}, '{{ $pendingWeek['start']->format('Y-m-d') }}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
+                                                <i class="fas fa-comment mr-1"></i> Aprobar con comentarios
+                                            </button>
+                                        </div>
                                     @endif
                                 </div>
-                            </button>
-                            <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95">
-                                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                                    <div class="grid grid-cols-5 gap-2">
-                                        @foreach ($summary['days'] as $day)
-                                            <div class="text-center">
-                                                <div class="text-sm font-bold text-gray-600 dark:text-gray-300">{{ Carbon\Carbon::parse($day['date'])->format('D') }}</div>
-                                                <div class="text-lg font-semibold {{ $day['approved'] ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400' }}">
-                                                    {{ $day['hours'] }}
-                                                </div>
-                                                <div class="text-xs {{ $day['approved'] ? 'text-green-500' : 'text-yellow-500' }}">
-                                                    {{ $day['approved'] ? 'Aprobado' : 'Pendiente' }}
+                            @endforeach
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+
+        <!-- Current Week Summary Section -->
+        <section x-show="activeTab === 'current'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100 text-center">Resumen Semana Actual</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-blue-500 p-4">
+                    <h3 class="text-xl font-semibold text-white">
+                        <i class="far fa-calendar-check mr-2"></i> {{ $weekStart->format('d/m/Y') }} al {{ $weekStart->copy()->endOfWeek(Carbon\Carbon::FRIDAY)->format('d/m/Y') }}
+                    </h3>
+                </div>
+                <div class="p-4 sm:p-6">
+                    @foreach ($workHoursSummary as $employeeId => $summary)
+                        <div class="mb-6 last:mb-0 border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0 last:pb-0">
+                            <div class="flex flex-wrap items-center justify-between mb-4">
+                                <h4 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2 sm:mb-0">
+                                    <i class="fas fa-user-circle mr-2"></i> {{ $summary['name'] }}
+                                </h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-semibold">
+                                        <i class="fas fa-clock mr-1"></i> {{ $summary['total_hours'] }}/40h semanales
+                                    </span>
+                                    @if($summary['pending_hours'] > 0)
+                                        <span class="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm font-semibold">
+                                            <i class="fas fa-hourglass-half mr-1"></i> {{ $summary['pending_hours'] }}h pendientes por aprobar
+                                        </span>
+                                    @else
+                                        <span class="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-semibold">
+                                            <i class="fas fa-check mr-1"></i> Aprobadas
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                                <div class="grid grid-cols-3 sm:grid-cols-5 gap-1 sm:gap-2">
+                                    @foreach ($summary['days'] as $day)
+                                        <div class="flex-1 flex flex-col items-center">
+                                            <div class="text-sm font-bold text-gray-600 dark:text-gray-300">{{ Carbon\Carbon::parse($day['date'])->format('D') }}</div>
+                                            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-t-lg overflow-hidden" style="height: {{ ($day['hours'] / 8) * 100 }}%">
+                                                <div class="h-full {{ $day['approved'] ? 'bg-green-500' : 'bg-yellow-500' }} flex items-center justify-center text-white font-bold">
+                                                    {{ $day['hours'] }}h
                                                 </div>
                                             </div>
-                                        @endforeach
-                                    </div>
+                                            <div class="text-xs {{ $day['approved'] ? 'text-green-500' : 'text-yellow-500' }} mt-1">
+                                                {{ $day['approved'] ? 'Aprobado' : 'Pendiente' }}
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                @if ($summary['pending_hours'] > 0)
-                                    <div class="flex justify-end space-x-2">
-                                        <form action="{{ route('work-hours.approve-week') }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="week_start" value="{{ $weekStart->format('Y-m-d') }}">
-                                            <input type="hidden" name="employee_id" value="{{ $employeeId }}">
-                                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
-                                                Aprobar
-                                            </button>
-                                        </form>
-                                        <button onclick="showCommentModal({{ $employeeId }}, '{{ $weekStart->format('Y-m-d') }}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
-                                            Aprobar con comentarios
-                                        </button>
-                                    </div>
-                                @endif
                             </div>
+                            @if($summary['pending_hours'] > 0)
+                                <div class="flex flex-wrap justify-end gap-2">
+                                    <form action="{{ route('work-hours.approve-week') }}" method="POST" onsubmit="saveScrollPosition(this)">
+                                        @csrf
+                                        <input type="hidden" name="week_start" value="{{ $weekStart->format('Y-m-d') }}">
+                                        <input type="hidden" name="employee_id" value="{{ $employeeId }}">
+                                        <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
+                                            <i class="fas fa-check mr-1"></i> Aprobar
+                                        </button>
+                                    </form>
+                                    <button onclick="showCommentModal({{ $employeeId }}, '{{ $weekStart->format('Y-m-d') }}')" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition duration-300">
+                                        <i class="fas fa-comment mr-1"></i> Aprobar con comentarios
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     @endforeach
                 </div>
@@ -297,10 +335,8 @@
     </div>
 </div>
 
-
-
 <div id="commentModal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="flex items-end justify-center min-h-screen pt-4  px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
@@ -324,53 +360,60 @@
     </div>
 </div>
 
-
 <script>
-        let currentEmployeeId, currentWeekStart;
+    let currentEmployeeId, currentWeekStart;
+    let scrollPosition = 0;
 
-        function showCommentModal(employeeId, weekStart) {
-            currentEmployeeId = employeeId;
-            currentWeekStart = weekStart;
-            document.getElementById('commentModal').classList.remove('hidden');
-        }
+    function showCommentModal(employeeId, weekStart) {
+        currentEmployeeId = employeeId;
+        currentWeekStart = weekStart;
+        document.getElementById('commentModal').classList.remove('hidden');
+    }
 
-        function closeCommentModal() {
-            document.getElementById('commentModal').classList.add('hidden');
-        }
+    function closeCommentModal() {
+        document.getElementById('commentModal').classList.add('hidden');
+    }
 
-        function approveWithComment() {
-            const comment = document.getElementById('approvalComment').value;
-            
-            fetch('{{ route('work-hours.approve-week-with-comment') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    employee_id: currentEmployeeId,
-                    week_start: currentWeekStart,
-                    comment: comment
-                })
+    function approveWithComment() {
+        const comment = document.getElementById('approvalComment').value;
+
+        fetch('{{ route('work-hours.approve-week-with-comment') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                employee_id: currentEmployeeId,
+                week_start: currentWeekStart,
+                comment: comment
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Semana aprobada con comentarios');
-                    location.reload();
-                } else {
-                    alert('Error al aprobar la semana');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Semana aprobada con comentarios');
+                location.reload();
+                window.scrollTo(0, scrollPosition);
+            } else {
                 alert('Error al aprobar la semana');
-            });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al aprobar la semana');
+        });
 
-            closeCommentModal();
-        }
-        </script>
-    </div>
+        closeCommentModal();
+    }
+
+    function saveScrollPosition(form) {
+        scrollPosition = window.pageYOffset;
+        form.submit();
+    }
+</script>
+
+
 
 
 <!-- <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 shadow-2xl rounded-xl overflow-hidden mb-8 p-16">
@@ -448,64 +491,68 @@
 </div> -->
 
 
-<div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 shadow-2xl rounded-xl overflow-hidden mb-8 p-20">
-    <h2 class="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-6 text-center">
-        Resumen de {{ $currentMonth->translatedFormat('F Y') }}
-    </h2>
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 shadow-2xl rounded-xl overflow-hidden mb-8 p-4 sm:p-8 md:p-12 lg:p-10">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-6 text-center">
+            Resumen de {{ $currentMonth->translatedFormat('F Y') }}
+        </h2>
 
-    @foreach($empleadosInfo as $empleado)
-    <div class="mb-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-800 dark:to-indigo-800 p-4 cursor-pointer" onclick="toggleEmployeeDetails({{ $empleado['id'] }})">
-            <h3 class="text-xl font-bold text-white flex items-center justify-between">
-                <span class="flex items-center">
-                    <svg class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                    </svg>
-                    {{ $empleado['name'] }}
-                </span>
-                <span class="text-sm">{{ number_format($empleado['totalApprovedHours'], 2) }} horas aprobadas</span>
-            </h3>
-        </div>
-        
-        <div id="employeeDetails_{{ $empleado['id'] }}" class="p-4 hidden">
-            <div class="mb-4">
-                <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Resumen de Semanas</h4>
-                <div class="flex items-center space-x-2">
-                    @foreach($empleado['approvedWeeks'] as $index => $week)
-                        <div class="w-8 h-8 rounded-full flex items-center justify-center {{ $week['approved'] ? 'bg-green-500' : 'bg-yellow-500' }}" title="Semana {{ $index + 1 }}: {{ $week['start'] }} - {{ $week['end'] }}">
-                            <span class="text-xs text-white font-bold">{{ $index + 1 }}</span>
+        <div class="space-y-6">
+            @foreach($empleadosInfo as $empleado)
+            <div x-data="{ open: false }" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
+                <div @click="open = !open" class="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-800 dark:to-indigo-800 p-4 cursor-pointer">
+                    <h3 class="text-lg sm:text-xl font-bold text-white flex flex-wrap items-center justify-between">
+                        <span class="flex items-center mb-2 sm:mb-0">
+                            <svg class="h-6 w-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                            </svg>
+                            {{ $empleado['name'] }}
+                        </span>
+                        <span class="text-sm bg-white bg-opacity-20 px-3 py-1 rounded-full">
+                            {{ number_format($empleado['totalApprovedHours'], 2) }} horas aprobadas
+                        </span>
+                    </h3>
+                </div>
+
+                <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="opacity-100 transform scale-100" x-transition:leave-end="opacity-0 transform scale-95" class="p-4">
+                    <div class="mb-6">
+                        <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Resumen de Semanas</h4>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @foreach($empleado['approvedWeeks'] as $index => $week)
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $week['approved'] ? 'bg-green-500' : 'bg-yellow-500' }} text-white" title="Semana {{ $index + 1 }}: {{ $week['start'] }} - {{ $week['end'] }}">
+                                    <span class="text-xs font-bold">S{{ $index + 1 }}</span>
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
+                    </div>
+
+                    @php
+                        $allApproved = collect($empleado['approvedWeeks'])->every(fn($week) => $week['approved']);
+                        $canDownload = $allApproved && $empleado['totalApprovedHours'] >= 160;
+                    @endphp
+
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-inner">
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" id="certifyHours_{{ $empleado['id'] }}" class="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out">
+                            <label for="certifyHours_{{ $empleado['id'] }}" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                Certifico que las horas son correctas y autorizo el pago
+                            </label>
+                        </div>
+                        <button
+                            onclick="downloadReport({{ $empleado['id'] }}, '{{ $empleado['name'] }}')"
+                            class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white {{ $canDownload ? 'bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' : 'bg-gray-400 cursor-not-allowed' }} transition ease-in-out duration-150"
+                            {{ $canDownload ? '' : 'disabled' }}
+                        >
+                            <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                            Descargar Reporte Mensual
+                        </button>
+                    </div>
                 </div>
             </div>
-            
-            @php
-                $allApproved = collect($empleado['approvedWeeks'])->every(fn($week) => $week['approved']);
-                $canDownload = $allApproved && $empleado['totalApprovedHours'] >= 160;
-            @endphp
-            
-            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-inner">
-                <div class="flex items-center mb-3">
-                    <input type="checkbox" id="certifyHours_{{ $empleado['id'] }}" class="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out">
-                    <label for="certifyHours_{{ $empleado['id'] }}" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                        Certifico que las horas son correctas y autorizo el pago
-                    </label>
-                </div>
-                <button
-                    onclick="downloadReport({{ $empleado['id'] }}, '{{ $empleado['name'] }}')"
-                    class="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white {{ $canDownload ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-400 cursor-not-allowed' }} transition ease-in-out duration-150"
-                    {{ $canDownload ? '' : 'disabled' }}
-                >
-                    <svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                    </svg>
-                    Descargar Reporte Mensual
-                </button>
-            </div>
+            @endforeach
         </div>
     </div>
-    @endforeach
-</div>
 
 
 
@@ -529,7 +576,7 @@ function downloadReport(employeeId, employeeName) {
         });
         return;
     }
-    
+
     const totalApprovedHours = {{ $totalApprovedHours }};
     if (totalApprovedHours < 160) {
         Swal.fire({
@@ -540,7 +587,7 @@ function downloadReport(employeeId, employeeName) {
         });
         return;
     }
-    
+
     Swal.fire({
         title: `Descargando reporte de ${employeeName}`,
         text: 'Por favor, espere mientras se genera el reporte...',
@@ -550,7 +597,7 @@ function downloadReport(employeeId, employeeName) {
             Swal.showLoading();
         }
     });
-    
+
     // Simular la descarga (reemplazar con la lógica real de descarga)
     setTimeout(() => {
         Swal.fire({
@@ -560,7 +607,7 @@ function downloadReport(employeeId, employeeName) {
             confirmButtonText: 'Genial'
         });
     }, 2000);
-    
+
     // Iniciar la descarga real
     window.location.href = `{{ route('work-hours.download-monthly-report', ['month' => $currentMonth->format('Y-m')]) }}?employee_id=${employeeId}`;
 }
@@ -1282,145 +1329,157 @@ function toggleFilter() {
 
 
 
-<div class="bg-gray-100 dark:bg-gray-900 p-8 rounded-xl shadow-lg">
+
+<div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 md:p-8 rounded-t-xl shadow-lg p-12">
+    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Asignaciones de mi equipo</h2>
+    <p class="text-blue-100 text-sm md:text-base">Gestiona las tareas de tu equipo de forma eficiente</p>
+</div>
+
+<div class="bg-gray-100 dark:bg-gray-900 p-4 md:p-8 rounded-b-xl shadow-lg p-10">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <h2 class="text-3xl font-black text-blue-500 dark:text-blue-500 mb-8 pb-4 border-b-2 border-blue-500">Asignaciones a mi equipo</h2>
     <div id="employerTaskList" class="space-y-4">
-        @foreach($tareasEmpleador as $tarea)
-            <div id="task-{{ $tarea->id }}" class="task-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out hover:shadow-xl">
-                <!-- Compact Header -->
-                <div class="flex items-center justify-between p-4 cursor-pointer" onclick="toggleTaskDetails({{ $tarea->id }})">
-                    <div class="flex-grow">
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white truncate">{{ $tarea->title }}</h3>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="priority-badge priority-{{ $tarea->priority }} px-2 py-1 rounded-full text-xs font-medium">
-                            {{ ucfirst($tarea->priority) }}
-                        </span>
-                        <span id="status-badge-{{ $tarea->id }}" class="status-badge {{ $tarea->completed ? 'status-completed' : 'status-in-progress' }} px-2 py-1 rounded-full text-xs font-medium">
-                            {{ $tarea->completed ? 'Completada' : 'En Progreso' }}
-                        </span>
-                        <i class="fas fa-chevron-down transform transition-transform duration-300" id="chevron-{{ $tarea->id }}"></i>
-                    </div>
-                </div>
-                
-                <!-- Collapsible Body -->
-                <div id="taskDetails-{{ $tarea->id }}" class="hidden">
-                    <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700">
-                        <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">{{ $tarea->description }}</p>
-                        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-                            <span class="inline-flex items-center">
-                                <i class="fas fa-calendar-alt mr-1 text-indigo-500"></i>
-                                {{ $tarea->start_date->format('d/m/Y') }} - {{ $tarea->end_date->format('d/m/Y') }}
+        @if($tareasEmpleador->isEmpty())
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center">
+                <i class="fas fa-tasks text-4xl text-gray-400 mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">No hay tareas asignadas</h3>
+                <p class="text-gray-600 dark:text-gray-400">Comienza a crear tareas para tu equipo y mejora la productividad.</p>
+                {{-- <button onclick="showNewTaskForm()" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i>Crear nueva tarea
+                </button> --}}
+            </div>
+        @else
+            @foreach($tareasEmpleador as $tarea)
+                <div id="task-{{ $tarea->id }}" class="task-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out hover:shadow-xl border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between p-4 cursor-pointer" onclick="toggleTaskDetails({{ $tarea->id }})">
+                        <div class="flex-grow">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $tarea->title }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1 hidden md:block">{{ Str::limit($tarea->description, 100) }}</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row items-end md:items-center space-y-2 md:space-y-0 md:space-x-2">
+                            <span class="priority-badge priority-{{ $tarea->priority }} px-2 py-1 rounded-full text-xs font-medium">
+                                {{ ucfirst($tarea->priority) }}
                             </span>
-                            <span class="inline-flex items-center">
-                                <i class="fas fa-user mr-1 text-indigo-500"></i>
-                                {{ $tarea->visibleTo->name ?? 'Usuario desconocido' }}
+                            <span id="status-badge-{{ $tarea->id }}" class="status-badge {{ $tarea->completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }} px-2 py-1 rounded-full text-xs font-medium">
+                                {{ $tarea->completed ? 'Completada' : 'En Progreso' }}
                             </span>
+                            <i class="fas fa-chevron-down transform transition-transform duration-300" id="chevron-{{ $tarea->id }}"></i>
                         </div>
                     </div>
-                    <div class="p-4 flex flex-wrap gap-2">
-                        <button onclick="toggleEmployerTaskCompletion({{ $tarea->id }})" 
-                                id="toggle-button-{{ $tarea->id }}" 
-                                class="task-button {{ $tarea->completed ? 'toggle-status-button-completed' : 'toggle-status-button-in-progress' }} px-3 py-1 rounded-md text-xs">
-                            {{ $tarea->completed ? 'Marcar En Progreso' : 'Marcar Completada' }}
-                        </button>
-                        <button onclick="showEmployerEditFields({{ $tarea->id }})" class="task-button bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs">
-                            <i class="fas fa-edit mr-1"></i>Editar
-                        </button>
-                        <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de querer eliminar esta tarea?');" class="inline-block">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="task-button bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs">
-                                <i class="fas fa-trash-alt mr-1"></i>Eliminar
+
+                    <div id="taskDetails-{{ $tarea->id }}" class="hidden">
+                        <div class="px-4 py-2 bg-gray-50 dark:bg-gray-700">
+                            <div class="flex flex-wrap justify-between text-xs text-gray-500 dark:text-gray-400">
+                                <span class="inline-flex items-center mb-2 md:mb-0">
+                                    <i class="fas fa-calendar-alt mr-1 text-indigo-500"></i>
+                                    {{ $tarea->start_date->format('d/m/Y') }} - {{ $tarea->end_date->format('d/m/Y') }}
+                                </span>
+                                <span class="inline-flex items-center">
+                                    <i class="fas fa-user mr-1 text-indigo-500"></i>
+                                    {{ $tarea->visibleTo->name ?? 'Usuario desconocido' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="p-4 flex flex-wrap gap-2">
+                            <button onclick="toggleEmployerTaskCompletion({{ $tarea->id }})"
+                                    id="toggle-button-{{ $tarea->id }}"
+                                    class="btn-action {{ $tarea->completed ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600' }} text-white">
+                                <i class="fas {{ $tarea->completed ? 'fa-undo' : 'fa-check' }} mr-1"></i>
+                                {{ $tarea->completed ? 'Marcar En Progreso' : 'Marcar Completada' }}
                             </button>
-                        </form>
-                        <button onclick="toggleEmployerComments({{ $tarea->id }})" class="task-button bg-gray-300 hover:bg-blue-500 hover:text-white text-black px-3 py-1 rounded-md text-xs flex items-center">
-                            <i class="fas fa-comments mr-1"></i>
-                            <span id="commentButtonText-{{ $tarea->id }}">Comentarios</span>
-                            <span id="commentCount-{{ $tarea->id }}" class="ml-1 bg-white text-indigo-500 px-1.5 py-0.5 rounded-full text-xs font-bold">{{ $tarea->comments->count() }}</span>
-                        </button>
-                    </div>
-                    
-                    <!-- Edit Form -->
-                    <form id="editForm{{ $tarea->id }}" style="display:none;" action="{{ route('tareas.update', $tarea->id) }}" method="POST" class="edit-form p-4 bg-gray-100 dark:bg-gray-700">
-                        @csrf
-                        @method('PUT')
-                        <div class="space-y-4">
-                            <div>
-                                <label for="title{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
-                                <input type="text" id="title{{ $tarea->id }}" name="title" value="{{ $tarea->title }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                            </div>
-                            <div>
-                                <label for="description{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-                                <textarea id="description{{ $tarea->id }}" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">{{ $tarea->description }}</textarea>
-                            </div>
+                            <button onclick="showEmployerEditFields({{ $tarea->id }})" class="btn-action bg-blue-500 hover:bg-blue-600 text-white">
+                                <i class="fas fa-edit mr-1"></i>Editar
+                            </button>
+                            <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de querer eliminar esta tarea?');" class="inline-block">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-action bg-red-500 hover:bg-red-600 text-white">
+                                    <i class="fas fa-trash-alt mr-1"></i>Eliminar
+                                </button>
+                            </form>
+                            <button onclick="toggleEmployerComments({{ $tarea->id }})" class="btn-action bg-gray-300 hover:bg-gray-400 text-gray-800">
+                                <i class="fas fa-comments mr-1"></i>
+                                <span id="commentButtonText-{{ $tarea->id }}">Comentarios</span>
+                                <span id="commentCount-{{ $tarea->id }}" class="ml-1 bg-white text-blue-500 px-1.5 py-0.5 rounded-full text-xs font-bold">{{ $tarea->comments->count() }}</span>
+                            </button>
+                        </div>
+
+                        <form id="editForm{{ $tarea->id }}" style="display:none;" action="{{ route('tareas.update', $tarea->id) }}" method="POST" class="edit-form p-4 bg-gray-100 dark:bg-gray-700">
+                            @csrf
+                            @method('PUT')
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="col-span-2">
+                                    <label for="title{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
+                                    <input type="text" id="title{{ $tarea->id }}" name="title" value="{{ $tarea->title }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                                </div>
+                                <div class="col-span-2">
+                                    <label for="description{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+                                    <textarea id="description{{ $tarea->id }}" name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white">{{ $tarea->description }}</textarea>
+                                </div>
                                 <div>
                                     <label for="start_date{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de inicio</label>
-                                    <input type="date" id="start_date{{ $tarea->id }}" name="start_date" value="{{ $tarea->start_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                                    <input type="date" id="start_date{{ $tarea->id }}" name="start_date" value="{{ $tarea->start_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
                                 </div>
                                 <div>
                                     <label for="end_date{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de fin</label>
-                                    <input type="date" id="end_date{{ $tarea->id }}" name="end_date" value="{{ $tarea->end_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                                    <input type="date" id="end_date{{ $tarea->id }}" name="end_date" value="{{ $tarea->end_date->format('Y-m-d') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                                </div>
+                                <div class="col-span-2">
+                                    <label for="priority{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</label>
+                                    <select id="priority{{ $tarea->id }}" name="priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                                        <option value="low" {{ $tarea->priority == 'low' ? 'selected' : '' }}>Baja</option>
+                                        <option value="medium" {{ $tarea->priority == 'medium' ? 'selected' : '' }}>Media</option>
+                                        <option value="high" {{ $tarea->priority == 'high' ? 'selected' : '' }}>Alta</option>
+                                        <option value="urgent" {{ $tarea->priority == 'urgent' ? 'selected' : '' }}>Urgente</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div>
-                                <label for="priority{{ $tarea->id }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Prioridad</label>
-                                <select id="priority{{ $tarea->id }}" name="priority" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
-                                    <option value="low" {{ $tarea->priority == 'low' ? 'selected' : '' }}>Baja</option>
-                                    <option value="medium" {{ $tarea->priority == 'medium' ? 'selected' : '' }}>Media</option>
-                                    <option value="high" {{ $tarea->priority == 'high' ? 'selected' : '' }}>Alta</option>
-                                    <option value="urgent" {{ $tarea->priority == 'urgent' ? 'selected' : '' }}>Urgente</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Guardar cambios
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <!-- Comments Section -->
-                    <div id="commentsSection-{{ $tarea->id }}" class="hidden bg-gray-50 dark:bg-gray-700 p-4">
-                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Comentarios</h4>
-                        <div id="commentsList-{{ $tarea->id }}" class="space-y-4 mb-6">
-                            @foreach ($tarea->comments as $comment)
-                                <div id="comment-{{ $comment->id }}" class="bg-white dark:bg-gray-600 p-4 rounded-lg shadow-sm">
-                                    <div class="flex items-start justify-between">
-                                        <div class="flex-grow">
-                                            <p class="text-sm text-gray-800 dark:text-gray-200">
-                                                <span class="font-medium text-indigo-600 dark:text-indigo-400">{{ $comment->user->name }}:</span> 
-                                                <span id="commentContent-{{ $comment->id }}">{{ $comment->content }}</span>
-                                            </p>
-                                            <small class="text-xs text-gray-500 dark:text-gray-400">{{ $comment->created_at->diffForHumans() }}</small>
-                                        </div>
-                                        @if($comment->user_id == auth()->id())
-                                            <div class="flex space-x-2">
-                                                <button onclick="editEmployerComment({{ $comment->id }})" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs transition duration-150 ease-in-out">
-                                                    <i class="fas fa-edit"></i> Editar
-                                                </button>
-                                                <button onclick="deleteEmployerComment({{ $comment->id }}, {{ $tarea->id }})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs transition duration-150 ease-in-out">
-                                                    <i class="fas fa-trash"></i> Eliminar
-                                                </button>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                        <form onsubmit="addEmployerTaskComment(event, {{ $tarea->id }})" class="mt-4">
-                            @csrf
-                            <div class="flex items-start space-x-4">
-                                <textarea id="newComment-{{ $tarea->id }}" rows="3" class="flex-grow p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Añadir un comentario..."></textarea>
-                                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out">
-                                    <i class="fas fa-paper-plane mr-2"></i>Comentar
+                            <div class="mt-4">
+                                <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out transform hover:scale-105">
+                                    Guardar cambios
                                 </button>
                             </div>
                         </form>
+
+                        <div id="commentsSection-{{ $tarea->id }}" class="hidden bg-gray-50 dark:bg-gray-700 p-4 rounded-b-lg">
+                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Comentarios</h4>
+                            <div id="commentsList-{{ $tarea->id }}" class="space-y-4 mb-6">
+                                @foreach ($tarea->comments as $comment)
+                                    <div id="comment-{{ $comment->id }}" class="flex items-start space-x-3 bg-white dark:bg-gray-600 p-4 rounded-lg shadow-sm">
+                                        <img src="{{ $comment->user->avatar }}" alt="{{ $comment->user->name }}" class="w-10 h-10 rounded-full">
+                                        <div class="flex-grow">
+                                            <p class="text-sm text-gray-800 dark:text-gray-200">
+                                                <span class="font-medium text-indigo-600 dark:text-indigo-400">{{ $comment->user->name }}</span>
+                                                <span class="text-gray-500 text-xs ml-2">{{ $comment->created_at->diffForHumans() }}</span>
+                                            </p>
+                                            <p id="commentContent-{{ $comment->id }}" class="mt-1">{{ $comment->content }}</p>
+                                            @if($comment->user_id == auth()->id())
+                                                <div class="mt-2 flex space-x-2">
+                                                    <button onclick="editEmployerComment({{ $comment->id }})" class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs transition duration-150 ease-in-out">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </button>
+                                                    <button onclick="deleteEmployerComment({{ $comment->id }}, {{ $tarea->id }})" class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-xs transition duration-150 ease-in-out">
+                                                        <i class="fas fa-trash"></i> Eliminar
+                                                    </button>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <form onsubmit="addEmployerTaskComment(event, {{ $tarea->id }})" class="mt-4">
+                                @csrf
+                                <div class="flex items-start space-x-4">
+                                    <textarea id="newComment-{{ $tarea->id }}" rows="3" class="flex-grow p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none dark:bg-gray-600 dark:border-gray-500 dark:text-white" placeholder="Añadir un comentario..."></textarea>
+                                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105">
+                                        <i class="fas fa-paper-plane mr-2"></i>Comentar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        @endforeach
+            @endforeach
+        @endif
     </div>
 </div>
 
@@ -1460,16 +1519,16 @@ function toggleTaskDetails(taskId) {
     chevronElement.classList.toggle('rotate-180');
 }
 
-//ESTE ES EL JS NUEVO PARA MANEJAR LAS TAREAS DE LA EMPRESA 
+//ESTE ES EL JS NUEVO PARA MANEJAR LAS TAREAS DE LA EMPRESA
 
 // Función para marcar una tarea como completada o en progreso
 function toggleEmployerTaskCompletion(taskId) {
     const toggleButton = document.getElementById(`toggle-button-${taskId}`);
     const statusBadge = document.getElementById(`status-badge-${taskId}`);
-    
+
     if (toggleButton && statusBadge) {
         const isCompleted = toggleButton.textContent.includes('Marcar como En Progreso');
-        
+
         fetch(`/empleador/tareas/${taskId}/toggle-completion`, {
             method: 'POST',
             headers: {
@@ -1511,66 +1570,17 @@ function toggleEmployerTaskCompletion(taskId) {
 }
 
 
-// Función para agregar un comentario a una tarea del empleador
-// Función para agregar un comentario a una tarea del empleador
-// function addEmployerTaskComment(event, taskId) {
-//     event.preventDefault();
-//     const newCommentTextarea = document.getElementById(`newComment-${taskId}`);
-//     if (newCommentTextarea) {
-//         const commentContent = newCommentTextarea.value;
-        
-//         if (commentContent.trim() === '') {
-//             showAlert('Por favor, escribe un comentario antes de enviarlo.', 'error');
-//             return;
-//         }
-        
-//         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-//         fetch(`/empleador/tareas/${taskId}/comments`, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'X-CSRF-TOKEN': csrfToken
-//             },
-//             body: JSON.stringify({ content: commentContent })
-//         })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.success) {
-//                 console.log('Comentario agregado con éxito');
-//                 // Agregar el comentario a la lista de comentarios
-//                 const commentList = document.getElementById('commentList');
-//                 const newComment = createEmployerCommentHTML(data.comment);
-//                 commentList.innerHTML += newComment;
-//                 // Mostrar el mensaje de éxito al usuario
-//                 showAlert(data.message, 'success');
-//                 // Limpiar el textarea
-//                 newCommentTextarea.value = '';
-//             } else {
-//                 console.log('Error al agregar el comentario');
-//                 // Mostrar el mensaje de error al usuario
-//                 showAlert(data.message, 'error');
-//             }
-//         })
-//         .catch(error => {
-//             console.log('Error:', error);
-//         });
-        
-//     } else {
-//         console.error(`New comment textarea not found for task ${taskId}`);
-//     }
-// }
-
 function addEmployerTaskComment(event, taskId) {
     event.preventDefault();
     const newCommentTextarea = document.getElementById(`newComment-${taskId}`);
     if (newCommentTextarea) {
         const commentContent = newCommentTextarea.value;
-        
+
         if (commentContent.trim() === '') {
             showAlert('Por favor, escribe un comentario antes de enviarlo.', 'error');
             return;
         }
-        
+
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
         fetch(`/empleador/tareas/${taskId}/comments`, {
             method: 'POST',
@@ -1624,7 +1634,7 @@ function createEmployerCommentHTML(comment) {
             <div class="flex items-start justify-between">
                 <div class="flex-grow">
                     <p class="text-sm text-gray-800 dark:text-gray-200">
-                        <span class="font-medium text-indigo-600 dark:text-indigo-400">${comment.user.name}:</span> 
+                        <span class="font-medium text-indigo-600 dark:text-indigo-400">${comment.user.name}:</span>
                         <span id="commentContent-${comment.id}">${comment.content}</span>
                     </p>
                     <small class="text-xs text-gray-500 dark:text-gray-400">${new Date(comment.created_at).toLocaleString()}</small>
@@ -1650,15 +1660,15 @@ function editEmployerComment(commentId) {
         const textarea = document.createElement('textarea');
         textarea.value = currentContent;
         textarea.classList.add('w-full', 'p-2', 'border', 'rounded', 'mt-2', 'dark:bg-gray-600', 'dark:text-white');
-        
+
         const saveButton = document.createElement('button');
         saveButton.textContent = 'Guardar';
         saveButton.classList.add('mt-2', 'px-4', 'py-2', 'bg-blue-500', 'text-white', 'rounded', 'hover:bg-blue-600');
-        
+
         saveButton.onclick = function() {
             updateEmployerComment(commentId, textarea.value);
         };
-        
+
         commentContent.parentNode.insertBefore(textarea, commentContent.nextSibling);
         textarea.parentNode.insertBefore(saveButton, textarea.nextSibling);
         commentContent.style.display = 'none';
@@ -1719,7 +1729,7 @@ function deleteEmployerComment(commentId, taskId) {
                 if (commentElement) {
                     commentElement.remove();
                     showAlert('Comentario eliminado con éxito', 'success');
-                    
+
                     // Actualizar el contador de comentarios
                     const commentCount = document.getElementById(`commentCount-${taskId}`);
                     if (commentCount) {
@@ -1776,6 +1786,8 @@ function showAlert(message, type) {
     }, 3000);
 }
 </script>
+
+
 
       
 
@@ -1968,11 +1980,15 @@ function showAlert(message, type) {
 
 
 
-<div class="bg-gray-100 dark:bg-gray-900 p-6 rounded-xl shadow-lg mt-10 mb-10">
+<div class="bg-gray-100 dark:bg-gray-900 p-10 rounded-xl shadow-lg mt-10 mb-16 ">
    
-    <h2 class="text-3xl font-black text-blue-500 dark:text-blue-500 mb-8 pb-4 border-b-2 border-blue-500">Actividades del equipo</h2>
 
-    <div id="taskList" class="space-y-4">
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 md:p-8 rounded-t-xl shadow-lg">
+    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Actividades del equipo</h2>
+    <p class="text-blue-100 text-sm md:text-base">Gestiona las tareas de tu equipo de forma eficiente</p>
+</div>
+
+    <div id="taskList" class="space-y-4 p-16">
         @foreach($tareas as $tarea)
             <div id="task-{{ $tarea->id }}" class="task-card bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden transition duration-300 ease-in-out hover:shadow-md
                         @if($tarea->priority == 'urgent') border-l-4 border-red-500
